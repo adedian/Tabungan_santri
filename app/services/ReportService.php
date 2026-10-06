@@ -209,7 +209,7 @@ final class ReportService
                 ['key' => 'code', 'label' => 'Kode Transaksi', 'type' => 'text', 'width' => 20],
                 ['key' => 'date', 'label' => 'Tanggal', 'type' => 'date', 'width' => 12],
                 ['key' => 'name', 'label' => 'Nama Santri', 'type' => 'text', 'width' => 28],
-                ['key' => 'sid', 'label' => 'ID Santri', 'type' => 'text', 'width' => 11],
+                ['key' => 'sid', 'label' => 'ID Santri', 'type' => 'text', 'width' => 11, 'pdf' => false], // PDF: kolom ini dilewati agar muat di kertas
                 ['key' => 'jenjang', 'label' => 'Jenjang', 'type' => 'text', 'width' => 9],
                 ['key' => 'kelas', 'label' => 'Kelas', 'type' => 'text', 'width' => 10],
                 ['key' => 'period', 'label' => 'Bulan', 'type' => 'text', 'width' => 16],
