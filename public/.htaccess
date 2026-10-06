@@ -1,0 +1,15 @@
+Options -Indexes -MultiViews
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # File/folder nyata (assets) dilayani langsung; sisanya ke front controller.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+</IfModule>
+# Jangan layani file tersembunyi / sumber sensitif jika ada yang tersasar ke public/
+<FilesMatch "^\.|\.(sql|log|ini|bak|md)$">
+    Require all denied
+</FilesMatch>

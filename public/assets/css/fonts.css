@@ -1,0 +1,17 @@
+/* Font self-host (subset Latin, cukup untuk bahasa Indonesia). Lisensi: SIL Open Font License 1.1.
+   - Plus Jakarta Sans — Tokotype / Gumpita Rahayu (variabel, bobot 400–800)
+   - Fraunces — Undercase Type / Phaedra Charles & Flavia Zimbardi (variabel, bobot 500–600) */
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("../fonts/plus-jakarta-sans-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 500 600;
+  font-display: swap;
+  src: url("../fonts/fraunces-latin.woff2") format("woff2");
+}

@@ -1,0 +1,97 @@
+/* ==========================================================================
+   Cetak: pratinjau di layar + aturan @media print
+   Dokumen: A4 potret, margin 15 mm. Font mengikuti contoh Excel (Calibri; cadangan Carlito/Arial).
+   ========================================================================== */
+@page { size: A4 portrait; margin: 15mm; }
+
+.print-body { margin: 0; background: #E4E9E5; color: #000; }
+.print-body, .print-body table { font-family: Calibri, Carlito, Arial, "Helvetica Neue", sans-serif; }
+
+/* ---------- Bilah alat (hanya layar) ---------- */
+.print-toolbar { position: sticky; top: 0; z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: var(--shadow-sm); font-family: var(--font-ui); }
+.print-toolbar-inner { display: flex; align-items: center; gap: var(--space-3); max-width: 70rem; margin: 0 auto; padding: var(--space-3) var(--space-4); }
+.print-toolbar-title { font-size: var(--text-md); }
+.print-summary { white-space: nowrap; }
+.print-options { display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-3) var(--space-4); max-width: 70rem; margin: 0 auto; padding: 0 var(--space-4) var(--space-3); font-size: var(--text-sm); }
+.print-options label { display: grid; gap: 4px; font-weight: 600; }
+.print-options .input, .print-options .select { min-height: 2.25rem; padding: 0 var(--space-2); }
+.print-options .check { display: flex; align-items: center; gap: 6px; font-weight: 500; min-height: 2.25rem; }
+.print-tip { max-width: 70rem; margin: 0 auto; padding: 0 var(--space-4) var(--space-3); font-size: var(--text-sm); color: var(--muted); }
+.print-draft { display: flex; gap: var(--space-3); align-items: flex-start; max-width: 210mm; margin: var(--space-4) auto 0; padding: var(--space-3) var(--space-4); background: var(--warning-50); border: 1px solid var(--warning-200); border-radius: var(--radius); color: var(--warning-700); font-family: var(--font-ui); font-size: var(--text-base); }
+.print-draft .icon { margin-top: 2px; }
+.print-empty { max-width: 210mm; margin: var(--space-8) auto; padding: var(--space-8); text-align: center; background: var(--surface); border-radius: var(--radius-lg); font-family: var(--font-ui); }
+
+/* ---------- Lembar kertas (pratinjau) ---------- */
+.print-area { padding: var(--space-4) var(--space-4) var(--space-12); overflow-x: auto; }
+.sheet {
+  position: relative; box-sizing: border-box; width: 210mm; min-height: 297mm; margin: var(--space-4) auto;
+  padding: 15mm; background: #fff; box-shadow: 0 2px 14px rgba(0, 0, 0, .18);
+}
+.sheet-foot { position: absolute; left: 15mm; right: 15mm; bottom: 8mm; display: flex; justify-content: space-between; font-size: 9pt; color: #444; }
+
+/* ---------- Rekap Tabungan per Nama (mengikuti contoh Excel) ---------- */
+.rekap-form { border: 1px solid #000; }
+.rekap-title { margin: 0; padding: 4px 8px 6px; text-align: center; font: 700 14pt/1.3 Calibri, Carlito, Arial, sans-serif; color: #000; letter-spacing: 0; }
+.rekap-title::after { content: none; }
+.rekap-title span { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
+.rekap-ident { margin: 0; padding: 2px 8px 6px; min-height: 22mm; font-size: 11pt; font-weight: 700; }
+.rekap-ident > div { display: grid; grid-template-columns: 34mm 5mm 1fr; align-items: baseline; line-height: 1.55; }
+.rekap-ident dt, .rekap-ident dd { margin: 0; font-weight: 700; }
+.rekap-ident .v { font-weight: 700; overflow-wrap: anywhere; }
+
+.rekap-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 11pt; border-top: 1px solid #000; }
+.rekap-table col.c-no { width: 8%; } .rekap-table col.c-tgl { width: 15%; } .rekap-table col.c-ket { width: 31%; }
+.rekap-table col.c-masuk { width: 15%; } .rekap-table col.c-keluar { width: 15%; } .rekap-table col.c-total { width: 16%; }
+.rekap-table th, .rekap-table td { line-height: 1.2; border: 1px solid #000; padding: 2px 5px; height: var(--rh, 7.2mm); vertical-align: middle; overflow-wrap: anywhere; }
+.rekap-table thead th { background: #FBE5D6; font-weight: 700; text-align: center; line-height: 1.2; height: 10mm; }
+.rekap-table td.no { text-align: center; }
+.rekap-table .clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+.rekap-form.dense .rekap-table, .rekap-form.dense .rekap-ident { font-size: 10pt; }
+.rekap-form.dense .rekap-table th, .rekap-form.dense .rekap-table td { padding: 1px 4px; }
+.rekap-form.dense .rekap-ident { min-height: 18mm; }
+.rekap-table td.tgl { text-align: center; white-space: nowrap; }
+.rekap-table td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rekap-table td.note { font-style: italic; }
+.rekap-table tr.open td, .rekap-table tr.carry td { background: #F5F5F5; }
+.rekap-table tfoot td { font-weight: 700; height: 7.5mm; }
+.rekap-table tfoot td:first-child { text-align: center; }
+.rekap-table tr { break-inside: avoid; }
+
+/* ---------- Laporan (format sementara) ---------- */
+.lap { font-size: 10.5pt; color: #000; }
+.lap-title { margin: 0 0 4px; font: 700 16pt/1.25 Calibri, Carlito, Arial, sans-serif; color: #000; text-align: center; }
+.lap-title::after { content: none; }
+.lap-sub { margin: 0; text-align: center; font-size: 10.5pt; }
+.lap-h2 { margin: 16px 0 6px; font: 700 12pt/1.3 Calibri, Carlito, Arial, sans-serif; color: #000; }
+.lap-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 10pt; }
+.lap-table th, .lap-table td { border: 1px solid #000; padding: 3px 6px; vertical-align: top; }
+.lap-table thead th { background: #FBE5D6; text-align: left; }
+.lap-table tfoot td { font-weight: 700; background: #F5F5F5; }
+.lap-table .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.lap-table thead { display: table-header-group; }
+.lap-table tr { break-inside: avoid; }
+.lap-summary { margin-top: 14px; }
+.lap-summary th { background: #FBE5D6; text-align: left; width: 28%; }
+.lap-summary td { width: 22%; }
+.lap-table .empty-row { text-align: center; color: #555; }
+.lap-meta { margin: 14px 0 0; font-size: 9pt; color: #444; }
+
+/* ---------- Layar kecil: lembar bisa digulir menyamping ---------- */
+@media (max-width: 860px) {
+  .print-toolbar { position: static; }
+  .print-toolbar-inner { flex-wrap: wrap; }
+  .print-summary { display: none; }
+  .print-area { padding-inline: 0; }
+}
+
+/* ---------- Saat dicetak ---------- */
+@media print {
+  html, body { background: #fff !important; }
+  .no-print, .print-toolbar, .print-draft, .print-empty { display: none !important; }
+  .print-area { padding: 0; overflow: visible; }
+  .sheet { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; break-after: page; page-break-after: always; }
+  .sheet:last-of-type { break-after: auto; page-break-after: auto; }
+  .sheet-foot { position: static; margin-top: 4mm; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  a { color: inherit; text-decoration: none; }
+}

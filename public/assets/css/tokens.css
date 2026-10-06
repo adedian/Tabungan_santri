@@ -1,0 +1,110 @@
+/* ==========================================================================
+   TABUNGAN SANTRI — Design tokens
+   Semua warna/ukuran komponen WAJIB memakai token di sini (jangan hardcode).
+   Kontras teks sudah diverifikasi WCAG AA (>= 4.5:1) untuk pasangan yang dipakai.
+   ========================================================================== */
+:root {
+  /* --- Hijau (identitas utama) --- */
+  --green-950: #0E3B20;
+  --green-900: #14532D;   /* sidebar, judul */
+  --green-800: #166534;   /* aksi utama */
+  --emerald-700: #047857; /* link, aksen, "masuk" */
+  --emerald-600: #0A8F68;
+
+  /* --- Sage (permukaan hijau lembut) --- */
+  --sage-50:  #F3F7F4;
+  --sage-100: #E3EEE6;
+  --sage-200: #CFE1D4;
+  --sage-300: #B2CDB9;
+
+  /* --- Gold / beige (aksen jarang, jangan dominan) --- */
+  --gold-400: #D9B862;    /* di atas hijau tua */
+  --gold-500: #B8923A;    /* garis dekoratif */
+  --gold-700: #7A5C14;    /* teks emas di atas terang */
+  --beige-50: #FAF3E0;
+
+  /* --- Netral hangat --- */
+  --bg:        #F7F8F6;
+  --surface:   #FFFFFF;
+  --surface-2: #F1F4F1;   /* area tenggelam (input disabled, dsb.) */
+  --text:      #1F2937;
+  --text-2:    #374151;
+  --muted:     #5B6862;
+  --placeholder: #68756F;
+  --line:        #E3E8E3;
+  --line-strong: #C6D0C8;
+
+  /* --- Di atas latar gelap (sidebar) --- */
+  --on-dark:       #E8F1EA;
+  --on-dark-muted: #A9C7B1;
+
+  /* --- Semantik --- */
+  --success-700: #046C4E;  --success-50: #E6F2EA;  --success-200: #BFDCC9;
+  --danger-700:  #B42318;  --danger-50:  #FEF3F2;  --danger-200:  #FAC9C4;
+  --warning-700: #8A5A00;  --warning-50: #FFF7E0;  --warning-200: #F1D99B;
+  --info-700:    #1F5F8B;  --info-50:    #EEF5FA;  --info-200:    #C5DCEB;
+
+  /* Mutasi tabungan */
+  --masuk:  var(--success-700);  --masuk-bg:  var(--success-50);
+  --keluar: var(--danger-700);   --keluar-bg: var(--danger-50);
+
+  /* Warna grafik (kategorikal, urutan tetap; sudah lolos validate_palette: CVD ΔE 11.0, kontras ≥ 3:1) */
+  --chart-1: #047857;   /* Masuk */
+  --chart-2: #D97706;   /* Keluar */
+
+  --focus: var(--emerald-700);
+  --focus-ring: 0 0 0 3px var(--sage-200);
+
+  /* --- Tipografi --- */
+  --font-ui: "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+
+  --text-xs: .75rem;      /* 12 */
+  --text-sm: .8125rem;    /* 13 */
+  --text-base: .875rem;   /* 14 */
+  --text-md: .9375rem;    /* 15 — teks isi */
+  --text-lg: 1.0625rem;   /* 17 */
+  --text-xl: 1.25rem;     /* 20 */
+  --text-2xl: 1.5rem;     /* 24 */
+  --text-3xl: 1.875rem;   /* 30 */
+  --text-4xl: 2.5rem;     /* 40 */
+
+  /* --- Spasi (kelipatan 4px) --- */
+  --space-1: .25rem;  --space-2: .5rem;   --space-3: .75rem;  --space-4: 1rem;
+  --space-5: 1.25rem; --space-6: 1.5rem;  --space-8: 2rem;    --space-10: 2.5rem;
+  --space-12: 3rem;   --space-16: 4rem;
+
+  /* --- Bentuk --- */
+  --radius-sm: 6px;
+  --radius: 8px;       /* kontrol: tombol, input */
+  --radius-lg: 12px;   /* kartu, modal */
+  --radius-pill: 999px;
+
+  --shadow-sm:  0 1px 2px rgba(20, 40, 28, .06);
+  --shadow-pop: 0 10px 28px rgba(20, 40, 28, .14), 0 2px 6px rgba(20, 40, 28, .06);
+
+  /* --- Layout --- */
+  --sidebar-w: 280px;
+  --topbar-h: 64px;
+  --content-max: 1320px;
+  --control-h: 2.625rem;      /* 42px */
+  --control-h-sm: 2rem;       /* 32px */
+  --control-h-lg: 3rem;       /* 48px */
+
+  /* --- Gerak --- */
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --dur-fast: .15s;
+  --dur: .22s;
+
+  /* --- Lapisan --- */
+  --z-topbar: 30;
+  --z-overlay: 39;
+  --z-sidebar: 40;
+  --z-dropdown: 50;
+  --z-toast: 100;
+}
+
+/* Layar sentuh / ponsel: kontrol lebih besar agar mudah ditekan */
+@media (max-width: 768px), (pointer: coarse) {
+  :root { --control-h: 3rem; --control-h-sm: 2.5rem; --control-h-lg: 3.25rem; }
+}

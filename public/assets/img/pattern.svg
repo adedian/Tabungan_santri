@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#FFFFFF" stroke-width="1">
+  <!-- Bintang 8 sudut (dua persegi bertumpuk 45°), ubin 64×64 -->
+  <rect x="16" y="16" width="32" height="32"/>
+  <polygon points="32,9.37 54.63,32 32,54.63 9.37,32"/>
+  <circle cx="32" cy="32" r="3"/>
+  <path d="M0 0h2M62 0h2M0 64h2M62 64h2" stroke-width="1"/>
+</svg>

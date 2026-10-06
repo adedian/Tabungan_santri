@@ -1,0 +1,8 @@
+/app/config/database.php
+/storage/logs/*
+/storage/sessions/*
+/storage/cache/*
+!/storage/**/.gitkeep
+.DS_Store
+Thumbs.db
+/AKUN-DEMO.local.md
