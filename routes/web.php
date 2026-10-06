@@ -32,6 +32,7 @@ $router->group(['middleware' => ['auth']], function ($router) {
     $router->get('/dashboard', [DashboardController::class, 'index'], ['can:dashboard.view']);
     $router->get('/api/dashboard/summary', [DashboardController::class, 'summary'], ['can:dashboard.view']);
     $router->get('/api/dashboard/activity', [DashboardController::class, 'activity'], ['can:dashboard.view']);
+    $router->get('/api/dashboard/classes', [DashboardController::class, 'classes'], ['can:dashboard.view']);
     $router->get('/api/sync', [SyncController::class, 'check']);
 
     // Audit log

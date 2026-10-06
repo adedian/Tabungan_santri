@@ -45,6 +45,49 @@ $this->endSection(); ?>
     </div>
 </div>
 
+
+<section class="cls" id="cls-section" aria-labelledby="cls-title">
+    <div class="cls-head">
+        <div>
+            <h2 id="cls-title">Saldo Tabungan Setiap Kelas</h2>
+            <p class="muted" id="cls-sub" aria-live="polite"></p>
+        </div>
+    </div>
+
+    <form class="cls-filter" id="cls-filter" autocomplete="off" novalidate>
+        <div class="field">
+            <label class="label" for="cf-jenjang">Jenjang</label>
+            <select class="select" id="cf-jenjang"><option value="">Semua</option></select>
+        </div>
+        <div class="field">
+            <label class="label" for="cf-period">Periode</label>
+            <select class="select" id="cf-period">
+                <option value="day">Hari</option><option value="month">Bulan</option><option value="year">Tahun</option>
+            </select>
+        </div>
+        <div class="field" data-for="day">
+            <label class="label" for="cf-date">Tanggal</label>
+            <input class="input" type="date" id="cf-date" min="2000-01-01" max="2100-12-31">
+        </div>
+        <div class="field" data-for="month">
+            <label class="label" for="cf-month">Bulan</label>
+            <select class="select" id="cf-month">
+                <?php foreach (bulan_list() as $n => $b): ?><option value="<?= $n ?>"><?= e($b) ?></option><?php endforeach; ?>
+            </select>
+        </div>
+        <div class="field" data-for="month year">
+            <label class="label" for="cf-year">Tahun</label>
+            <select class="select" id="cf-year"></select>
+        </div>
+        <div class="cls-filter-actions">
+            <button type="submit" class="btn btn-primary" id="cf-apply"><?= icon('filter') ?>Tampilkan</button>
+            <button type="button" class="btn btn-secondary" id="cf-reset">Reset</button>
+        </div>
+    </form>
+
+    <div id="cls-body" class="cls-body" aria-live="polite" aria-busy="false"></div>
+</section>
+
 <div class="dash-row">
     <section class="card" aria-labelledby="activity-title">
         <div class="card-head">
@@ -104,5 +147,6 @@ $this->endSection(); ?>
 <?php $this->section('scripts'); ?>
 <script src="<?= e(asset('js/table.js')) ?>" defer></script>
 <script src="<?= e(asset('js/chart.js')) ?>" defer></script>
+<script src="<?= e(asset('js/dashboard-classes.js')) ?>" defer></script>
 <script src="<?= e(asset('js/dashboard.js')) ?>" defer></script>
 <?php $this->endSection(); ?>

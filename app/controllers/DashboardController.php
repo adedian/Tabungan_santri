@@ -16,6 +16,7 @@ final class DashboardController extends Controller
             'initial' => [
                 'summary'  => DashboardService::summary(),
                 'activity' => DashboardService::activity('week'),
+                'classes'  => DashboardService::classBalances($request->query()),
             ],
         ]);
     }
@@ -24,6 +25,13 @@ final class DashboardController extends Controller
     {
         Session::close();
         return $this->success(DashboardService::summary());
+    }
+
+    /** GET /api/dashboard/classes?jenjang=&period=day|month|year&date=&month=&year= */
+    public function classes(Request $request): Response
+    {
+        Session::close();
+        return $this->success(DashboardService::classBalances($request->query()));
     }
 
     public function activity(Request $request): Response

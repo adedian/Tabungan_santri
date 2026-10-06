@@ -132,7 +132,8 @@
       App.api('api/dashboard/summary', { headers: { 'X-Background-Poll': '1' } }).then(function (res) {
         state.summary = res.data; renderStats(res.data); renderJenjang(res.data); renderRecent(res.data, prevMax);
       }),
-      loadActivity(state.range)
+      loadActivity(state.range),
+      App.ClassBalances ? App.ClassBalances.reload({ background: true }) : null
     ]);
   }
 

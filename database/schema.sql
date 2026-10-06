@@ -99,6 +99,7 @@ CREATE TABLE IF NOT EXISTS `savings_transactions` (
   KEY `idx_tx_period` (`period_year`,`period_month`),
   KEY `idx_tx_deleted` (`deleted_at`),
   KEY `idx_tx_created_by` (`created_by`),
+  KEY `idx_tx_date_class` (`transaction_date`,`jenjang`,`kelas`),
   CONSTRAINT `chk_tx_amount` CHECK (`amount` > 0),
   CONSTRAINT `chk_tx_month`  CHECK (`period_month` BETWEEN 1 AND 12),
   CONSTRAINT `fk_tx_student`    FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON UPDATE CASCADE ON DELETE RESTRICT,
@@ -210,19 +211,20 @@ CREATE TABLE IF NOT EXISTS `student_class_history` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_history_student_year` (`student_id`,`from_year`),
   KEY `idx_history_promotion` (`promotion_id`),
+  KEY `idx_history_student_date` (`student_id`,`processed_at`),
   CONSTRAINT `fk_history_student`   FOREIGN KEY (`student_id`)   REFERENCES `students` (`id`)          ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT `fk_history_promotion` FOREIGN KEY (`promotion_id`) REFERENCES `class_promotions` (`id`)  ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT `fk_history_user`      FOREIGN KEY (`processed_by`) REFERENCES `users` (`id`)             ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------------------------
--- schema_migrations: instalasi baru dari berkas ini sudah mencakup migrasi 001
+-- schema_migrations: instalasi baru dari berkas ini sudah mencakup migrasi 001 & 002
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `schema_migrations` (
   `version` VARCHAR(100) NOT NULL PRIMARY KEY,
   `applied_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-INSERT IGNORE INTO `schema_migrations` (`version`) VALUES ('001_revisi1_kenaikan_alumni');
+INSERT IGNORE INTO `schema_migrations` (`version`) VALUES ('001_revisi1_kenaikan_alumni'), ('002_revisi2_indeks_dashboard');
 
 -- ----------------------------------------------------------------------------
 -- View: saldo per santri (satu tempat untuk aturan soft delete)

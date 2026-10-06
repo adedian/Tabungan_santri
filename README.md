@@ -28,6 +28,7 @@ Sistem tabungan santri berbasis web — PHP Native (8.0+), MySQL/MariaDB, PDO, t
 | Revisi | Isi | Status |
 |---|---|---|
 | 1 | Kenaikan Kelas (review → pilih → konfirmasi → proses, riwayat kelas, anti-ganda), Tabungan Alumni (Tarik Data Detail/Rekap), hapus massal (transaksi = soft delete, santri = arsip), tombol Kembali di semua halaman, responsif total (tabel → kartu, tanpa overflow), Panduan Komponen dihapus | ✅ |
+| 2 | Dashboard **Saldo Tabungan Setiap Kelas**: filter jenjang + periode (hari/bulan/tahun), Saldo Awal + Masuk − Keluar ± Pindah kelas = Saldo Akhir, total keseluruhan, realtime, responsif | ✅ |
 
 ## Instalasi (XAMPP)
 
@@ -42,7 +43,7 @@ Sistem tabungan santri berbasis web — PHP Native (8.0+), MySQL/MariaDB, PDO, t
    php tools/backup.php
    php tools/migrate.php
    ```
-   Migrasi (`database/migrations/*.sql`) hanya menambah kolom/tabel, tercatat di tabel `schema_migrations`, dan aman dijalankan ulang.
+   Migrasi (`database/migrations/*.sql`; terakhir `002_revisi2_indeks_dashboard` = indeks saja) hanya menambah kolom/tabel/indeks, tercatat di tabel `schema_migrations`, dan aman dijalankan ulang.
 3. Cek `app/config/database.php` (default XAMPP: user `root`, tanpa password).
 4. Buka <http://localhost/Tabungan_santri/> — cek <http://localhost/Tabungan_santri/health>.
 
@@ -64,6 +65,17 @@ Ketiganya memakai satu kata sandi demo yang **sengaja tidak ditulis di repo publ
 > Di production: impor `schema.sql` saja, lalu buat akun Super Admin pertama dengan `password_hash()` (satu `INSERT` ke tabel `users`); pengguna lain dibuat lewat halaman **Pengguna**.
 
 Login dapat memakai username **atau** email (tidak peka huruf besar/kecil).
+
+## Dashboard — Saldo Tabungan Setiap Kelas
+
+- Section di Dashboard (di bawah kartu ringkasan): filter **Jenjang** (Semua/TK/SD) + **Periode** (Hari / Bulan / Tahun). Hanya field yang relevan tampil: Hari → tanggal; Bulan → bulan + tahun; Tahun → tahun. Bawaan = **bulan berjalan**, semua jenjang. Tombol **Tampilkan** menerapkan, **Reset** mengembalikan ke bawaan; filter yang diterapkan ikut di URL.
+- Tampilan: kartu total (Saldo Akhir besar + persamaan periode), lalu per jenjang (TK, SD) kartu kecil tiap kelas: **Saldo Akhir**, Masuk, Keluar, Awal. Kelas tanpa data tetap tampil Rp 0; periode tanpa transaksi menampilkan "Belum ada data transaksi pada periode ini." Skeleton saat memuat; di ponsel satu kolom.
+- **Rumus** (per kelas dan total): `Saldo Awal Periode + Mutasi Masuk − Mutasi Keluar ± Pindah kelas = Saldo Akhir Periode`. Saldo Awal = saldo pada akhir hari sebelum periode; Saldo Akhir = saldo pada akhir periode (bukan sekadar jumlah mutasi). "Pindah kelas" hanya muncul bila ada kenaikan/kelulusan pada periode itu, supaya angkanya tidak menyesatkan.
+- **Histori kelas aman** (`app/models/ClassBalance.php`, tanpa tabel baru): mutasi dikelompokkan menurut kelas *saat transaksi* (snapshot `jenjang`+`kelas` di baris transaksi), jadi transaksi lama tidak pindah kelas karena master santri berubah. Saldo pada suatu tanggal dikelompokkan menurut kelas santri *pada tanggal itu* (peristiwa terakhir antara transaksi terakhir dan kenaikan kelas terakhir di `student_class_history`). Laporan periode lampau tetap sama setelah kenaikan kelas.
+- **Alumni** tidak dihitung sebagai kelas aktif sejak tanggal lulus (`graduated_at`); sebelum itu masih terhitung di kelasnya. Saldo/transaksinya tetap utuh di Tabungan Alumni. Transaksi soft-delete (`deleted_at`) tidak pernah dihitung. Total seluruh kelas pada hari ini = "Total Saldo" kartu dashboard = saldo ledger santri non-alumni.
+- **Kelas tidak di-hardcode**: daftar kelas = kelas santri aktif + kelas yang muncul di data + saran bawaan (TK A/B, 1A–6A); jenjang baru otomatis membentuk kelompok baru.
+- API `GET /api/dashboard/classes?jenjang=&period=day|month|year&date=&month=&year=` (izin `dashboard.view`). Parameter tak sah diganti nilai bawaan; query berparameter. Agregasi `SUM … GROUP BY` di database; indeks `idx_tx_date_class` dan `idx_history_student_date` (migrasi 002). ±0,3–0,5 dtk pada 40.000 transaksi.
+- **Realtime**: dashboard.js memanggil `App.ClassBalances.reload()` tiap polling mendeteksi perubahan (transaksi baru/hapus/kenaikan kelas) dengan filter yang sedang diterapkan — tanpa refresh manual (±5 dtk).
 
 ## Kenaikan kelas
 
