@@ -12,8 +12,8 @@ return [
         'name'         => 'TABSESS',
         'idle_timeout' => 7200, // detik tanpa aktivitas sebelum sesi berakhir
     ],
-    // Tampilkan menu yang belum dibangun sebagai "Segera" (penanda progres; false di production).
-    'show_planned_menu' => true,
+    // Tampilkan menu yang belum dibangun sebagai "Segera" (penanda progres pengembangan; false = final).
+    'show_planned_menu' => false,
     // Interval polling realtime di browser (ms).
     'sync_interval' => 5000,
 ];

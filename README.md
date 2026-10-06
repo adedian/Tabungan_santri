@@ -52,6 +52,33 @@ Ketiganya memakai satu kata sandi demo yang **sengaja tidak ditulis di repo publ
 
 Login dapat memakai username **atau** email (tidak peka huruf besar/kecil).
 
+## Menjalankan di produksi (checklist)
+
+1. Impor **`database/schema.sql` saja** (jangan `seed.sql`). Salin `app/config/database.example.php` → `database.php`, isi kredensial MySQL khusus aplikasi (bukan `root`).
+2. Buat Super Admin pertama dari terminal (kata sandi ditanya interaktif, tidak masuk riwayat perintah):
+   ```bash
+   php tools/create-admin.php superadmin "Nama Admin"
+   ```
+   Pengguna lain dibuat lewat halaman **Pengguna**. Hapus `AKUN-DEMO.local.md` bila ada.
+3. `app/config/app.php`: pastikan `debug => false`, `show_planned_menu => false`, `timezone` benar.
+4. Arahkan web server ke folder `public/` (atau biarkan `.htaccess` akar yang mengarahkan). Aktifkan **HTTPS** — cookie sesi otomatis `Secure` dan header HSTS dikirim saat HTTPS.
+5. Folder `storage/` (`logs`, `sessions`, `uploads`, `backups`) harus dapat ditulis web server dan **tidak** terbuka ke web.
+6. Cek `GET /health` → `{"success":true}`.
+7. Jadwalkan cadangan harian (Windows Task Scheduler / cron):
+   ```bash
+   php tools/backup.php --keep=14
+   ```
+   Hasil di `storage/backups/` (`.sql` + salinan logo); yang melebihi `--keep` terbaru dihapus otomatis. Salin juga ke media lain di luar server. Pulihkan dengan `mysql -u USER -p tabungan_santri < berkas.sql`.
+8. Periksa `storage/logs/` berkala; detail galat hanya ada di sana.
+
+## Keamanan (ringkas)
+
+- Semua POST/PUT/DELETE wajib token CSRF; sesi: `HttpOnly`, `SameSite=Lax`, `Secure` (HTTPS), ID diganti saat login/logout, kedaluwarsa 2 jam.
+- Login dibatasi (throttle per akun+IP dan per IP). Kata sandi `password_hash()` (bcrypt); tidak pernah dicatat/dikirim ke browser.
+- Izin per peran ditegakkan di server (route middleware) — halaman **dan** API. Query memakai prepared statement; output di view lewat `e()`.
+- CSP ketat (tanpa script inline), `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, `Cache-Control: no-store`.
+- Saldo selalu dari ledger dan dijaga di dalam transaksi DB (`SELECT … FOR UPDATE`); transaksi dihapus secara *soft delete*; semua aksi penting masuk Audit Log.
+
 ## Autentikasi & izin
 
 - Login di `/login`; 5 kegagalan per (akun + IP) atau 20 per IP dalam 15 menit mengunci sementara (`login_attempts`).
@@ -84,7 +111,7 @@ storage/       log & sesi (di luar web)
 - Layout view: `layouts/app` (halaman login-only), `layouts/auth`, `layouts/plain` (error). Di view: `$this->set('heading', ...)`, `$this->set('lead', ...)`, section `actions`/`scripts`.
 - Ikon: `icon('nama')` dari `public/assets/icons/sprite.svg` (tambah `<symbol>` baru bila perlu).
 - JS (`App.*`): `api()` (CSRF otomatis, 401 → login), `toast()`, `confirm()`, `setLoading()`, `rupiah()`. Atribut: `data-money`, `data-bind-label`, `data-loading-text`, `data-confirm`.
-- Menu sidebar: `app/config/navigation.php` (`ready => true` saat halaman selesai). Matikan `app.show_planned_menu` di Phase 17.
+- Menu sidebar: `app/config/navigation.php` (`ready => true` saat halaman selesai). `app.show_planned_menu` sudah `false` (final); item baru yang belum siap bisa ditandai `ready => false`.
 - Logo: placeholder bawaan sampai Super Admin mengunggah logo di **Pengaturan** (`partials/brand.php`).
 
 ## Realtime (polling ringan)
