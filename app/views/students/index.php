@@ -41,17 +41,18 @@ $this->endSection(); ?>
 </form>
 
 <section class="card card-flush" aria-label="Daftar santri">
+    <?php if ($manage): ?><div id="bulk-bar"></div><?php endif; ?>
     <div class="table-wrap" id="table-wrap">
-        <table class="table" style="min-width:860px">
+        <table class="table table-stack">
             <thead id="thead"><tr>
                 <th data-sort="code">ID</th>
-                <th data-sort="name">Nama</th>
+                <th data-sort="name" data-stack="title">Nama</th>
                 <th data-sort="kelas">Jenjang / Kelas</th>
                 <th data-sort="urut" class="num">No. Urut</th>
                 <th>Dawis / Blok</th>
                 <th data-sort="saldo" class="num">Saldo</th>
                 <th>Status</th>
-                <?php if ($manage): ?><th class="col-actions"><span class="sr-only">Aksi</span></th><?php endif; ?>
+                <?php if ($manage): ?><th class="col-actions" data-stack="actions"><span class="sr-only">Aksi</span></th><?php endif; ?>
             </tr></thead>
             <tbody id="tbody"></tbody>
         </table>
@@ -133,5 +134,6 @@ $this->endSection(); ?>
 <script type="application/json" id="students-data"><?= json_for_script($initial) ?></script>
 <?php $this->section('scripts'); ?>
 <script src="<?= e(asset('js/table.js')) ?>" defer></script>
+<script src="<?= e(asset('js/bulk.js')) ?>" defer></script>
 <script src="<?= e(asset('js/students.js')) ?>" defer></script>
 <?php $this->endSection(); ?>

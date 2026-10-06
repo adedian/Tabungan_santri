@@ -56,14 +56,14 @@ $this->section('actions'); ?>
 
 <section class="card card-flush mt-4" aria-label="Daftar aktivitas">
     <div class="table-wrap" id="table-wrap">
-        <table class="table" style="min-width:980px">
+        <table class="table table-stack">
             <thead id="thead"><tr>
                 <th data-sort="time">Waktu</th>
                 <th data-sort="user">Pengguna</th>
                 <th data-sort="module">Modul</th>
                 <th data-sort="action">Aksi</th>
                 <th>Referensi</th>
-                <th>Keterangan</th>
+                <th data-stack="full">Keterangan</th>
                 <th>IP</th>
             </tr></thead>
             <tbody id="tbody"></tbody>

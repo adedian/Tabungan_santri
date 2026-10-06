@@ -1,16 +1,17 @@
 <?php
 declare(strict_types=1);
 
+use App\Controllers\AlumniController;
 use App\Controllers\AuditController;
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\HomeController;
 use App\Controllers\PrintController;
+use App\Controllers\PromotionController;
 use App\Controllers\ReportController;
 use App\Controllers\SavingsController;
 use App\Controllers\SettingsController;
 use App\Controllers\StudentController;
-use App\Controllers\StyleguideController;
 use App\Controllers\SyncController;
 use App\Controllers\SystemController;
 use App\Controllers\UserController;
@@ -70,15 +71,27 @@ $router->group(['middleware' => ['auth']], function ($router) {
     $router->get('/api/savings/list', [SavingsController::class, 'list'], ['can:savings.view']);
     $router->put('/api/savings/{id:int}', [SavingsController::class, 'update'], ['can:savings.edit']);
     $router->delete('/api/savings/{id:int}', [SavingsController::class, 'destroy'], ['can:savings.delete']);
+    $router->post('/api/savings/bulk-delete', [SavingsController::class, 'bulkDestroy'], ['can:savings.delete']);
     $router->get('/api/savings/balance', [SavingsController::class, 'balance'], ['can:savings.view']);
     $router->get('/api/savings/recent', [SavingsController::class, 'recent'], ['can:savings.view']);
+
+    // Kenaikan kelas (Admin ke atas)
+    $router->get('/santri/kenaikan', [PromotionController::class, 'index'], ['can:promotions.manage']);
+    $router->get('/api/promotions/candidates', [PromotionController::class, 'candidates'], ['can:promotions.manage']);
+    $router->post('/api/promotions', [PromotionController::class, 'process'], ['can:promotions.manage']);
+
+    // Tabungan alumni & rekap alumni
+    $router->get('/tabungan/alumni', [AlumniController::class, 'index'], ['can:alumni.view']);
+    $router->get('/tabungan/alumni/{id:int}', [AlumniController::class, 'show'], ['can:alumni.view', 'can:savings.view']);
+    $router->get('/laporan/alumni', [AlumniController::class, 'rekap'], ['can:alumni.view']);
+    $router->get('/api/alumni', [AlumniController::class, 'list'], ['can:alumni.view']);
 
     // Master santri
     $router->get('/santri', [StudentController::class, 'index'], ['can:students.view']);
     $router->get('/api/students', [StudentController::class, 'list'], ['can:students.view']);
     $router->get('/api/students/search', [StudentController::class, 'search'], ['can:students.view']);
     $router->post('/api/students', [StudentController::class, 'store'], ['can:students.manage']);
+    $router->post('/api/students/bulk-delete', [StudentController::class, 'bulkDestroy'], ['can:students.manage']);
     $router->put('/api/students/{id:int}', [StudentController::class, 'update'], ['can:students.manage']);
     $router->put('/api/students/{id:int}/status', [StudentController::class, 'status'], ['can:students.manage']);
-    $router->get('/styleguide', [StyleguideController::class, 'index'], ['can:settings.manage']);
 });

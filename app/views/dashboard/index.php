@@ -26,6 +26,7 @@ $this->endSection(); ?>
         <div class="stat-label"><?= icon('wallet') ?>Total Saldo</div>
         <div class="stat-value" data-stat="saldo"><?= rupiah_html($t['saldo']) ?></div>
         <div class="stat-note" data-note="saldo"><?= e(number_format($sum['santri'], 0, ',', '.')) ?> santri aktif</div>
+        <div class="stat-note" data-note="alumni">Alumni (terpisah): <?= e(number_format($sum['alumni']['alumni'], 0, ',', '.')) ?> orang • <?= e(rupiah($sum['alumni']['saldo'])) ?></div>
     </div>
     <div class="stat" data-stat-card="masuk">
         <div class="stat-label"><?= icon('arrow-down-left') ?>Total Masuk</div>
@@ -85,9 +86,9 @@ $this->endSection(); ?>
         <?php endif; ?>
     </div>
     <div class="table-wrap" id="recent-wrap">
-        <table class="table">
+        <table class="table table-stack">
             <thead><tr>
-                <th>Tanggal</th><th>Santri</th><th>Kelas</th><th>Mutasi</th><th class="num">Nominal</th><th>Keterangan</th>
+                <th>Tanggal</th><th data-stack="title">Santri</th><th>Kelas</th><th>Mutasi</th><th class="num">Nominal</th><th data-stack="full">Keterangan</th>
             </tr></thead>
             <tbody id="recent-body"></tbody>
         </table>
@@ -101,6 +102,7 @@ $this->endSection(); ?>
 
 <script type="application/json" id="dash-data"><?= json_for_script($initial) ?></script>
 <?php $this->section('scripts'); ?>
+<script src="<?= e(asset('js/table.js')) ?>" defer></script>
 <script src="<?= e(asset('js/chart.js')) ?>" defer></script>
 <script src="<?= e(asset('js/dashboard.js')) ?>" defer></script>
 <?php $this->endSection(); ?>

@@ -22,6 +22,16 @@
 
   window.addEventListener('beforeprint', log);
 
+  // Tombol Kembali: ke halaman asal bila datang dari halaman lain di aplikasi ini, selain itu ke tautan induk
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a[data-back]') : null;
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) { return; }
+    try {
+      var r = document.referrer ? new URL(document.referrer) : null;
+      if (r && r.origin === location.origin && r.pathname !== location.pathname && history.length > 1) { e.preventDefault(); history.back(); }
+    } catch (err) { /* ikuti tautan */ }
+  });
+
   var btn = document.getElementById('btn-print');
   if (btn) { btn.addEventListener('click', function () { window.print(); }); }
 

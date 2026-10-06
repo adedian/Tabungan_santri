@@ -22,7 +22,7 @@
     q: F.q, student_id: F.student_id, jenjang: F.jenjang, kelas: F.kelas, month: F.month, year: F.year, mutation: F.mutation,
     from: F.from, to: F.to, sort: F.sort, dir: F.dir, page: F.page, per_page: F.per_page
   };
-  var data = raw, options = raw.options, lastIds = null, fresh = {}, ctrl = null, seq = 0;
+  var data = raw, options = raw.options, lastIds = null, fresh = {}, ctrl = null, seq = 0, bulk = null;
   var ctl = {
     q: $('#f-q'), jenjang: $('#f-jenjang'), kelas: $('#f-kelas'), month: $('#f-month'), year: $('#f-year'),
     mutation: $('#f-mutation'), from: $('#f-from'), to: $('#f-to')
@@ -127,17 +127,18 @@
         var ac = el('td', 'col-actions', null, tr);
         if (canEdit) {
           var eb = el('button', 'btn btn-ghost btn-icon btn-sm', null, ac); eb.type = 'button'; eb.title = 'Ubah';
-          eb.setAttribute('aria-label', 'Ubah transaksi ' + t.code); eb.appendChild(App.icon('pencil'));
+          eb.dataset.short = 'Ubah'; eb.setAttribute('aria-label', 'Ubah transaksi ' + t.code); eb.appendChild(App.icon('pencil'));
           eb.addEventListener("click", function () { actions.edit(t); });
         }
         if (canDelete) {
           var db = el('button', 'btn btn-ghost btn-icon btn-sm', null, ac); db.type = 'button'; db.title = 'Hapus';
-          db.setAttribute('aria-label', 'Hapus transaksi ' + t.code); db.appendChild(App.icon('trash'));
+          db.dataset.short = 'Hapus'; db.setAttribute('aria-label', 'Hapus transaksi ' + t.code); db.appendChild(App.icon('trash'));
           db.addEventListener("click", function () { actions.remove(t); });
         }
       }
     });
     lastIds = data.items.map(function (t) { return t.id; });
+    if (bulk) { bulk.afterRender(); }
   }
 
   function renderPager() {
@@ -166,6 +167,27 @@
 
   /* ---------- Ubah & hapus (modul bersama) ---------- */
   var actions = App.SavingsActions({ onChanged: function () { return load(); } });
+  /* ---------- Hapus massal (soft delete: transaksi tetap tercatat, tidak dihitung dalam saldo) ---------- */
+  if (canDelete && $('#bulk-bar')) {
+    bulk = App.Bulk({
+      host: $('#bulk-bar'), table: $('#table-wrap table'), noun: 'transaksi',
+      items: function () { return data.items; },
+      idOf: function (t) { return t.id; },
+      labelOf: function (t) { return 'transaksi ' + t.code + ' ' + t.student; },
+      title: 'Hapus Data?',
+      message: function (p) {
+        return 'Anda memilih ' + p.length + ' transaksi. Transaksi akan ditandai terhapus: tidak lagi dihitung dalam saldo, tetapi tetap tercatat di Audit Log. ' +
+          'Penghapusan dibatalkan seluruhnya bila membuat saldo santri menjadi negatif. Apakah Anda yakin?';
+      },
+      details: function (p) {
+        var m = 0, k = 0; p.forEach(function (t) { if (t.mutation === 'masuk') { m += t.amount; } else { k += t.amount; } });
+        return [{ label: 'Transaksi dipilih', value: String(p.length) }, { label: 'Total masuk', value: App.rupiah(m) }, { label: 'Total keluar', value: App.rupiah(k), total: true }];
+      },
+      remove: function (ids) { return App.api('api/savings/bulk-delete', { method: 'POST', data: { ids: ids } }); },
+      onDone: function (res) { App.toast('success', res.message); return load(); }
+    });
+  }
+
 
   /* ---------- Pasang ---------- */
   var sorter = App.Table.sortHeaders($('#thead'), state, function () { state.page = 1; load(); });

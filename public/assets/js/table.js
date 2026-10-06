@@ -3,6 +3,8 @@
      App.Table.pager(container, {page, pages, total, perPage, perPageOptions, noun, onPage, onPerPage})
      App.Table.sortHeaders(thead, state, onChange)   // th[data-sort="kolom"]; state = {sort, dir}
      App.Table.skeleton(tbody, cols, rows)
+     App.Table.stack(table)    // otomatis untuk <table class="table-stack">: tiap sel diberi data-label (dari <th>) agar
+                               // di layar sempit tabel tampil sebagai kartu. <th data-stack="title|full|actions|check">.
    Semua teks lewat textContent.
    ========================================================================== */
 (function () {
@@ -68,6 +70,7 @@
 
   function sortHeaders(thead, state, onChange) {
     var ths = Array.prototype.slice.call(thead.querySelectorAll('th[data-sort]'));
+    var bar = mobileSort(thead, ths, state, function () { paint(); onChange(state); });
     ths.forEach(function (th) {
       var label = th.textContent.trim();
       th.textContent = '';
@@ -80,6 +83,7 @@
       });
     });
     function paint() {
+      if (bar) { bar.sync(); }
       ths.forEach(function (th) {
         var active = th.getAttribute('data-sort') === state.sort;
         th.setAttribute('aria-sort', active ? (state.dir === 'asc' ? 'ascending' : 'descending') : 'none');
@@ -91,6 +95,64 @@
     return { paint: paint };
   }
 
+  /** Di layar sempit header tabel disembunyikan; sediakan pilihan "Urutkan" agar pengurutan tetap bisa dipakai. */
+  function mobileSort(thead, ths, state, changed) {
+    var wrap = thead.closest('.table-wrap');
+    if (!wrap || !ths.length) { return null; }
+    var box = document.createElement('div'); box.className = 'sort-bar';
+    var lab = el('label', 'sort-bar-label', 'Urutkan', box);
+    var sel = el('select', 'select', null, box); sel.setAttribute('aria-label', 'Urutkan menurut');
+    ths.forEach(function (th) { var o = el('option', null, th.textContent.trim(), sel); o.value = th.getAttribute('data-sort'); });
+    var dir = el('button', 'btn btn-secondary btn-icon', null, box); dir.type = 'button';
+    sel.id = 'sort-select-' + Math.random().toString(36).slice(2, 8); lab.htmlFor = sel.id;
+    sel.addEventListener('change', function () { state.sort = sel.value; changed(); });
+    dir.addEventListener('click', function () { state.dir = state.dir === 'asc' ? 'desc' : 'asc'; changed(); });
+    wrap.insertBefore(box, wrap.firstChild); // di dalam wrap agar ikut aturan container query
+    return {
+      sync: function () {
+        sel.value = state.sort;
+        dir.textContent = ''; dir.appendChild(App.icon(state.dir === 'asc' ? 'chevron-up' : 'chevron-down'));
+        dir.setAttribute('aria-label', state.dir === 'asc' ? 'Urutan naik, klik untuk menurun' : 'Urutan turun, klik untuk menaik');
+      }
+    };
+  }
+
+  /* Tabel → kartu di layar sempit (CSS .table-stack). Label tiap sel diambil dari <th> kolom yang sama. */
+  function stackRow(tr, heads) {
+    var cells = tr.children;
+    for (var i = 0; i < cells.length; i++) {
+      var td = cells[i], h = heads[i];
+      if (td.tagName !== 'TD' || td.hasAttribute('colspan') || !h) { continue; }
+      var mode = h.mode;
+      td.setAttribute('data-label', (mode === 'title' || mode === 'actions' || mode === 'check') ? '' : h.label);
+      if (mode) { td.classList.add('td-' + mode); }
+    }
+  }
+  function stack(table) {
+    if (!table || table.dataset.stacked) { return; }
+    table.dataset.stacked = '1';
+    var heads = [];
+    function readHeads() {
+      heads = Array.prototype.map.call(table.querySelectorAll('thead th'), function (th) {
+        var sr = th.querySelector('.sr-only');
+        return { label: sr ? '' : th.textContent.trim(), mode: th.getAttribute('data-stack') || '' };
+      });
+    }
+    function all() { readHeads(); Array.prototype.forEach.call(table.querySelectorAll('tbody tr, tfoot tr'), function (tr) { stackRow(tr, heads); }); }
+    all();
+    var obs = new MutationObserver(function (muts) {
+      readHeads();
+      muts.forEach(function (m) {
+        Array.prototype.forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1 && n.tagName === 'TR') { stackRow(n, heads); } });
+      });
+    });
+    Array.prototype.forEach.call(table.querySelectorAll('tbody, tfoot'), function (b) { obs.observe(b, { childList: true }); });
+    obs.observe(table.querySelector('thead') || table, { childList: true, subtree: true, characterData: true });
+    table.addEventListener('table:restack', all);
+  }
+  function stackAll() { Array.prototype.forEach.call(document.querySelectorAll('table.table-stack'), stack); }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', stackAll); } else { stackAll(); }
+
   function skeleton(tbody, cols, rows) {
     tbody.textContent = '';
     for (var r = 0; r < rows; r++) {
@@ -99,5 +161,5 @@
     }
   }
 
-  App.Table = { pager: pager, sortHeaders: sortHeaders, skeleton: skeleton };
+  App.Table = { pager: pager, sortHeaders: sortHeaders, skeleton: skeleton, stack: stack };
 })();

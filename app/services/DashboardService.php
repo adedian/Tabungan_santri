@@ -24,6 +24,7 @@ final class DashboardService
             'totals'  => $totals,
             'santri'  => array_sum(array_column($jenjang, 'santri')),
             'jenjang' => array_values($jenjang),
+            'alumni'  => Savings::alumniTotals(),
             'recent'  => Savings::recent(10),
         ];
     }

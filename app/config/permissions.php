@@ -20,6 +20,8 @@ return [
     'reports.view'    => $all,
     'reports.export'  => $admin,
     'audit.view'      => $admin,
+    'promotions.manage' => $admin,
+    'alumni.view'     => $all,
     'users.manage'    => $super,
     'settings.manage' => $super,
 ];

@@ -18,7 +18,7 @@
 
   var F = raw.list.filters;
   var state = { q: F.q, mutation: F.mutation, month: F.month, year: F.year, from: F.from, to: F.to, sort: F.sort, dir: F.dir, page: F.page, per_page: F.per_page };
-  var data = raw.list, profile = raw.profile, fresh = {}, lastIds = null, ctrl = null, seq = 0, years = raw.list.options.years;
+  var data = raw.list, profile = raw.profile, fresh = {}, lastIds = null, ctrl = null, seq = 0, years = raw.list.options.years, bulk = null;
   var ctl = { q: $('#f-q'), mutation: $('#f-mutation'), month: $('#f-month'), year: $('#f-year'), from: $('#f-from'), to: $('#f-to') };
 
   function fmtDate(iso) { var p = String(iso).split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso; }
@@ -35,10 +35,11 @@
     ['name', 'jenjang', 'kelas', 'code'].forEach(function (k) { Array.prototype.forEach.call(document.querySelectorAll('[data-f="' + k + '"]'), function (n) { n.textContent = s[k]; }); });
     ['nis', 'no_urut', 'dawis_blok'].forEach(function (k) { var n = $('[data-f="' + k + '"]'); if (n) { n.textContent = dash(s[k]); } });
     var title = $('.page-title'); if (title) { title.textContent = s.name; }
-    var lead = $('.page-lead'); if (lead) { lead.textContent = s.jenjang + ' — Kelas ' + s.kelas + ' • ID ' + s.code; }
+    var lead = $('.page-lead'); if (lead) { lead.textContent = (s.status === 'alumni' ? 'Alumni • ' + s.jenjang + ' — Kelas terakhir ' : s.jenjang + ' — Kelas ') + s.kelas + ' • ID ' + s.code; }
     var active = s.status === 'aktif';
-    var st = $('#p-status'); st.textContent = active ? 'Aktif' : 'Nonaktif'; st.className = 'badge ' + (active ? 'badge-success' : 'badge-muted');
-    $('#inactive-note').hidden = active; var add = $('#btn-add'); if (add) { add.hidden = !active; }
+    var st = $('#p-status'); st.textContent = { aktif: 'Aktif', nonaktif: 'Nonaktif', alumni: 'Alumni' }[s.status] || s.status;
+    st.className = 'badge ' + ({ aktif: 'badge-success', alumni: 'badge-info' }[s.status] || 'badge-muted');
+    $('#inactive-note').hidden = s.status !== 'nonaktif'; var add = $('#btn-add'); if (add) { add.hidden = !active; }
     [['saldo', m.saldo], ['masuk', m.masuk], ['keluar', m.keluar]].forEach(function (p) {
       var node = $('[data-stat="' + p[0] + '"]'), changed = node.dataset.v !== undefined && node.dataset.v !== String(p[1]);
       setMoney(node, p[1]); node.dataset.v = String(p[1]);
@@ -70,6 +71,27 @@
   /* ---------- Daftar ---------- */
   var tbody = $('#tbody'), wrap = $('#table-wrap'), empty = $('#empty');
   var actions = App.SavingsActions({ onChanged: function () { return refresh(); } });
+  /* ---------- Hapus massal (soft delete: transaksi tetap tercatat, tidak dihitung dalam saldo) ---------- */
+  if (canDelete && $('#bulk-bar')) {
+    bulk = App.Bulk({
+      host: $('#bulk-bar'), table: $('#table-wrap table'), noun: 'transaksi',
+      items: function () { return data.items; },
+      idOf: function (t) { return t.id; },
+      labelOf: function (t) { return 'transaksi ' + t.code + ' ' + t.student; },
+      title: 'Hapus Data?',
+      message: function (p) {
+        return 'Anda memilih ' + p.length + ' transaksi. Transaksi akan ditandai terhapus: tidak lagi dihitung dalam saldo, tetapi tetap tercatat di Audit Log. ' +
+          'Penghapusan dibatalkan seluruhnya bila membuat saldo santri menjadi negatif. Apakah Anda yakin?';
+      },
+      details: function (p) {
+        var m = 0, k = 0; p.forEach(function (t) { if (t.mutation === 'masuk') { m += t.amount; } else { k += t.amount; } });
+        return [{ label: 'Transaksi dipilih', value: String(p.length) }, { label: 'Total masuk', value: App.rupiah(m) }, { label: 'Total keluar', value: App.rupiah(k), total: true }];
+      },
+      remove: function (ids) { return App.api('api/savings/bulk-delete', { method: 'POST', data: { ids: ids } }); },
+      onDone: function (res) { App.toast('success', res.message); return refresh(); }
+    });
+  }
+
 
   function renderRows() {
     tbody.textContent = '';
@@ -94,11 +116,12 @@
       el('td', 'num amt', App.rupiah(t.saldo), tr);
       if (canEdit || canDelete) {
         var ac = el('td', 'col-actions', null, tr);
-        if (canEdit) { var eb = el('button', 'btn btn-ghost btn-icon btn-sm', null, ac); eb.type = 'button'; eb.title = 'Ubah'; eb.setAttribute('aria-label', 'Ubah transaksi ' + t.code); eb.appendChild(App.icon('pencil')); eb.addEventListener('click', function () { actions.edit(t); }); }
-        if (canDelete) { var db = el('button', 'btn btn-ghost btn-icon btn-sm', null, ac); db.type = 'button'; db.title = 'Hapus'; db.setAttribute('aria-label', 'Hapus transaksi ' + t.code); db.appendChild(App.icon('trash')); db.addEventListener('click', function () { actions.remove(t); }); }
+        if (canEdit) { var eb = el('button', 'btn btn-ghost btn-icon btn-sm', null, ac); eb.type = 'button'; eb.title = 'Ubah'; eb.dataset.short = 'Ubah'; eb.setAttribute('aria-label', 'Ubah transaksi ' + t.code); eb.appendChild(App.icon('pencil')); eb.addEventListener('click', function () { actions.edit(t); }); }
+        if (canDelete) { var db = el('button', 'btn btn-ghost btn-icon btn-sm', null, ac); db.type = 'button'; db.title = 'Hapus'; db.dataset.short = 'Hapus'; db.setAttribute('aria-label', 'Hapus transaksi ' + t.code); db.appendChild(App.icon('trash')); db.addEventListener('click', function () { actions.remove(t); }); }
       }
     });
     lastIds = data.items.map(function (t) { return t.id; });
+    if (bulk) { bulk.afterRender(); }
   }
   function renderPager() {
     App.Table.pager($('#pager'), {
@@ -128,7 +151,7 @@
   function loadProfile(opts) {
     return App.api('api/savings/student/' + SID, { headers: opts && opts.background ? { 'X-Background-Poll': '1' } : {} })
       .then(function (res) { profile = res.data; renderProfile(); })
-      .catch(function (e) { if (e && e.status === 404) { location.href = App.url('santri'); } else if (!(opts && opts.background)) { App.toast('error', e.message); } });
+      .catch(function (e) { if (e && e.status === 404) { location.href = App.url(raw.is_alumni ? 'tabungan/alumni' : 'santri'); } else if (!(opts && opts.background)) { App.toast('error', e.message); } });
   }
   function refresh(opts) { return Promise.all([loadProfile(opts), loadList(opts)]); }
 

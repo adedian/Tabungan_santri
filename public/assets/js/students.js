@@ -20,7 +20,7 @@
     q: raw.filters.q, jenjang: raw.filters.jenjang, kelas: raw.filters.kelas, status: raw.filters.status,
     sort: raw.filters.sort, dir: raw.filters.dir, page: raw.filters.page, per_page: raw.filters.per_page
   };
-  var data = raw, classes = raw.classes, lastIds = null, ctrl = null, seq = 0;
+  var data = raw, classes = raw.classes, lastIds = null, ctrl = null, seq = 0, bulk = null;
 
   /* ---------- Filter ---------- */
   var fq = $('#f-q'), fj = $('#f-jenjang'), fk = $('#f-kelas'), fs = $('#f-status');
@@ -84,15 +84,16 @@
         var ac = el('td', 'col-actions', null, tr);
         var eb = el('button', 'btn btn-ghost btn-icon btn-sm', null, ac); eb.type = 'button';
         eb.setAttribute('aria-label', 'Ubah ' + s.name); eb.title = 'Ubah'; eb.appendChild(App.icon('pencil'));
-        eb.addEventListener('click', function () { openForm(s); });
+        eb.dataset.short = 'Ubah'; eb.addEventListener('click', function () { openForm(s); });
         var tb = el('button', 'btn btn-ghost btn-icon btn-sm', null, ac); tb.type = 'button';
         var off = s.status === 'aktif';
         tb.setAttribute('aria-label', (off ? 'Nonaktifkan ' : 'Aktifkan ') + s.name); tb.title = off ? 'Nonaktifkan' : 'Aktifkan';
-        tb.appendChild(App.icon(off ? 'user-x' : 'user-check'));
+        tb.dataset.short = off ? 'Nonaktifkan' : 'Aktifkan'; tb.appendChild(App.icon(off ? 'user-x' : 'user-check'));
         tb.addEventListener('click', function () { toggleStatus(s); });
       }
     });
     lastIds = ids;
+    if (bulk) { bulk.afterRender(); }
   }
 
   function renderPager() {
@@ -204,6 +205,34 @@
       message: 'Santri nonaktif tidak muncul pada transaksi baru. Riwayat dan saldo tetap tersimpan' + (s.saldo > 0 ? ', dan saldo yang tersisa tidak hilang.' : '.'),
       details: details, confirmText: 'Nonaktifkan', tone: 'danger'
     }).then(function (yes) { if (yes) { go(); } });
+  }
+
+  /* ---------- Hapus massal = ARSIP: data, riwayat kelas & transaksi tetap aman di database ---------- */
+  if (canManage && $('#bulk-bar')) {
+    bulk = App.Bulk({
+      host: $('#bulk-bar'), table: $('#table-wrap table'), noun: 'santri',
+      items: function () { return data.items; },
+      idOf: function (s) { return s.id; },
+      labelOf: function (s) { return s.name; },
+      title: 'Hapus Data?',
+      message: function (p) {
+        return 'Anda memilih ' + p.length + ' santri. Santri akan diarsipkan (tidak tampil lagi); data, riwayat kelas, dan transaksi tabungannya tetap tersimpan. ' +
+          'Santri yang masih memiliki saldo tidak akan dihapus. Apakah Anda yakin?';
+      },
+      details: function (p) {
+        var withSaldo = p.filter(function (s) { return s.saldo !== 0; }).length;
+        var rows = [{ label: 'Santri dipilih', value: String(p.length) }];
+        if (withSaldo) { rows.push({ label: 'Masih bersaldo (akan dilewati)', value: String(withSaldo), total: true }); }
+        return rows;
+      },
+      remove: function (ids) { return App.api('api/students/bulk-delete', { method: 'POST', data: { ids: ids } }); },
+      onDone: function (res) {
+        var sk = (res.data && res.data.skipped) || [];
+        App.toast(sk.length ? 'warning' : 'success', res.message, { duration: sk.length ? 12000 : 4500 });
+        sk.slice(0, 5).forEach(function (x) { App.toast('warning', x.name + ': ' + x.reason, { duration: 12000 }); });
+        return load();
+      }
+    });
   }
 
   /* ---------- Pasang ---------- */

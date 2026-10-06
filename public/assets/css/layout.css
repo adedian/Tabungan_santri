@@ -74,6 +74,12 @@
   padding: 0 var(--space-8); background: var(--bg); border-bottom: 1px solid var(--line);
 }
 .topbar-date { color: var(--muted); font-size: var(--text-base); }
+.topbar-brand { display: none; align-items: center; gap: 10px; min-width: 0; color: var(--green-900); text-decoration: none; font-family: var(--font-display); font-weight: 600; letter-spacing: .02em; }
+.topbar-brand:hover { color: var(--green-900); }
+.topbar-brand .brand-mark { width: 36px; height: 36px; color: var(--green-800); border-color: var(--line-strong); }
+.topbar-brand .brand-mark svg { width: 22px; height: 22px; }
+.topbar-brand .brand-mark--img img { width: 28px; height: 28px; }
+.topbar-brand-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .topbar-spacer { flex: 1; }
 .btn.menu-btn { display: none; } /* .btn.menu-btn: harus lebih spesifik dari .btn (components.css) */
 
@@ -127,14 +133,15 @@
   .sidebar { transform: translateX(-100%); transition: transform var(--dur) var(--ease); box-shadow: none; }
   .sidebar.is-open { transform: none; box-shadow: var(--shadow-pop); }
   .sidebar-overlay.is-open { opacity: 1; pointer-events: auto; }
-  .btn.menu-btn { display: inline-flex; }
-  .topbar { padding: 0 var(--space-4); }
+  .btn.menu-btn { display: inline-flex; order: 99; margin-right: calc(var(--space-2) * -1); } /* ☰ di kanan: Logo ........ ☰ */
+  .topbar-brand { display: inline-flex; }
+  .topbar { padding: 0 var(--space-4); gap: var(--space-3); }
   .content { padding: var(--space-6) var(--space-4) var(--space-12); }
 }
 @media (max-width: 639px) {
   .topbar-date, .user-meta, .user-btn .icon { display: none; }
   .user-btn { padding: 4px; min-width: 44px; min-height: 44px; justify-content: center; }
-  h1, .h1 { font-size: var(--text-2xl); }
+  h1, .h1 { font-size: clamp(1.5rem, 1.05rem + 2vw, 1.875rem); }
 }
 
 /* ==========================================================================

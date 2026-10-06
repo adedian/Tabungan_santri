@@ -13,6 +13,7 @@ use PDOException;
 final class StudentService
 {
     public const PER_PAGE = [10, 25, 50];
+    public const MSG_ALUMNI = 'Santri ini sudah lulus (alumni). Datanya dikelola di menu Tabungan Alumni.';
     public const DEFAULT_CLASSES = [
         'TK' => ['TK A', 'TK B'],
         'SD' => ['1A', '2A', '3A', '4A', '5A', '6A'],
@@ -113,6 +114,9 @@ final class StudentService
         if ($old === null) {
             return ['ok' => false, 'notfound' => true];
         }
+        if ($old['status'] === 'alumni') {
+            return ['ok' => false, 'message' => self::MSG_ALUMNI];
+        }
         [$d, $errors] = self::clean($in, $old);
         if ($errors) {
             return ['ok' => false, 'errors' => $errors];
@@ -143,6 +147,9 @@ final class StudentService
         if ($old === null) {
             return ['ok' => false, 'notfound' => true];
         }
+        if ($old['status'] === 'alumni') {
+            return ['ok' => false, 'message' => self::MSG_ALUMNI];
+        }
         if ($old['status'] !== $status) {
             Database::transaction(static function () use ($id, $status, $old): void {
                 Student::setStatus($id, $status);
@@ -151,6 +158,57 @@ final class StudentService
             });
         }
         return ['ok' => true, 'student' => Student::find($id)];
+    }
+
+    /**
+     * Hapus massal santri = ARSIP (soft delete): data, riwayat kelas, dan transaksi tetap utuh di database,
+     * hanya tidak tampil lagi. Santri yang masih punya saldo tidak diarsipkan (dananya tidak boleh "hilang dari layar").
+     * Alumni tidak dapat diarsipkan dari sini. Tiap santri independen: yang gagal dilaporkan, yang lain tetap diproses.
+     *
+     * @param int[] $ids
+     * @return array{ok:bool, message?:string, deleted?:int, skipped?:array<int,array{id:int,name:string,reason:string}>}
+     */
+    public static function bulkArchive(array $ids, array $actor): array
+    {
+        if ($ids === []) {
+            return ['ok' => false, 'message' => 'Pilih minimal satu santri.'];
+        }
+        if (count($ids) > SavingsService::BULK_MAX) {
+            return ['ok' => false, 'message' => 'Maksimal ' . SavingsService::BULK_MAX . ' santri per proses.'];
+        }
+        sort($ids);
+
+        return Database::transaction(static function () use ($ids, $actor): array {
+            $in   = implode(',', array_fill(0, count($ids), '?'));
+            $rows = Database::fetchAll(
+                "SELECT s.id, s.student_code, s.name, s.jenjang, s.kelas, s.status, COALESCE(b.saldo, 0) AS saldo
+                   FROM students s LEFT JOIN v_student_balances b ON b.student_id = s.id
+                  WHERE s.id IN ({$in}) AND s.deleted_at IS NULL ORDER BY s.id FOR UPDATE",
+                $ids
+            );
+            $found   = array_column($rows, null, 'id');
+            $deleted = 0;
+            $skipped = [];
+
+            foreach ($ids as $id) {
+                $r = $found[$id] ?? null;
+                if ($r === null) {
+                    $skipped[] = ['id' => $id, 'name' => '#' . $id, 'reason' => 'Tidak ditemukan atau sudah diarsipkan.'];
+                } elseif ($r['status'] === 'alumni') {
+                    $skipped[] = ['id' => $id, 'name' => $r['name'], 'reason' => 'Alumni tidak dapat dihapus dari daftar santri.'];
+                } elseif ((int) $r['saldo'] !== 0) {
+                    $skipped[] = ['id' => $id, 'name' => $r['name'], 'reason' => 'Masih memiliki saldo ' . rupiah((int) $r['saldo']) . '. Nonaktifkan saja bila tidak lagi menabung.'];
+                } else {
+                    Database::execute('UPDATE students SET deleted_at = NOW(), deleted_by = ? WHERE id = ? AND deleted_at IS NULL', [(int) $actor['id'], $id]);
+                    AuditLog::record('Menghapus (arsip) santri', 'Santri', $r['student_code'], $r['name'] . ' — ' . $r['jenjang'] . ' ' . $r['kelas'] . ' [hapus massal]', $actor);
+                    $deleted++;
+                }
+            }
+            if ($deleted > 0) {
+                SyncState::bump('students');
+            }
+            return ['ok' => true, 'deleted' => $deleted, 'skipped' => $skipped];
+        });
     }
 
     /**

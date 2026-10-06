@@ -11,14 +11,18 @@ use App\Core\Database;
  */
 final class Savings
 {
-    /** @return array{masuk:int, keluar:int, saldo:int, transaksi:int} */
+    /**
+     * Total tabungan santri (alumni dipisahkan: lihat alumniTotals(); satu ledger, jadi tidak ada hitung ganda).
+     * @return array{masuk:int, keluar:int, saldo:int, transaksi:int}
+     */
     public static function totals(): array
     {
         $r = Database::fetchOne(
-            "SELECT COALESCE(SUM(CASE WHEN mutation_type = 'masuk'  THEN amount END), 0) AS masuk,
-                    COALESCE(SUM(CASE WHEN mutation_type = 'keluar' THEN amount END), 0) AS keluar,
+            "SELECT COALESCE(SUM(CASE WHEN t.mutation_type = 'masuk'  THEN t.amount END), 0) AS masuk,
+                    COALESCE(SUM(CASE WHEN t.mutation_type = 'keluar' THEN t.amount END), 0) AS keluar,
                     COUNT(*) AS transaksi
-               FROM savings_transactions WHERE deleted_at IS NULL"
+               FROM savings_transactions t JOIN students s ON s.id = t.student_id
+              WHERE t.deleted_at IS NULL AND s.status <> 'alumni'"
         ) ?? ['masuk' => 0, 'keluar' => 0, 'transaksi' => 0];
 
         $masuk  = (int) $r['masuk'];
@@ -38,12 +42,24 @@ final class Savings
         $rows = Database::fetchAll(
             "SELECT s.jenjang, SUM(s.status = 'aktif') AS santri, COALESCE(SUM(b.saldo), 0) AS saldo
                FROM students s JOIN v_student_balances b ON b.student_id = s.id
+              WHERE s.status <> 'alumni' AND s.deleted_at IS NULL
               GROUP BY s.jenjang"
         );
         foreach ($rows as $r) {
             $out[$r['jenjang']] = ['jenjang' => $r['jenjang'], 'santri' => (int) $r['santri'], 'saldo' => (int) $r['saldo']];
         }
         return $out;
+    }
+
+    /** Jumlah & saldo alumni (ledger yang sama, hanya santri berstatus alumni). @return array{alumni:int, saldo:int} */
+    public static function alumniTotals(): array
+    {
+        $r = Database::fetchOne(
+            "SELECT COUNT(*) AS n, COALESCE(SUM(b.saldo), 0) AS saldo
+               FROM students s JOIN v_student_balances b ON b.student_id = s.id
+              WHERE s.status = 'alumni' AND s.deleted_at IS NULL"
+        ) ?? ['n' => 0, 'saldo' => 0];
+        return ['alumni' => (int) $r['n'], 'saldo' => (int) $r['saldo']];
     }
 
     /** Saldo satu santri dari ledger: SUM(masuk) − SUM(keluar). */
@@ -341,7 +357,24 @@ final class Savings
 
     public static function softDelete(int $id, int $by): void
     {
-        Database::execute('UPDATE savings_transactions SET deleted_at = NOW(), updated_by = ? WHERE id = ? AND deleted_at IS NULL', [$by, $id]);
+        Database::execute('UPDATE savings_transactions SET deleted_at = NOW(), deleted_by = ?, updated_by = ? WHERE id = ? AND deleted_at IS NULL', [$by, $by, $id]);
+    }
+
+    /**
+     * Baris mentah (belum dihapus) untuk banyak ID, urut santri lalu id.
+     * @param int[] $ids
+     */
+    public static function findManyRaw(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+        $in = implode(',', array_fill(0, count($ids), '?'));
+        return Database::fetchAll(
+            "SELECT t.*, s.name AS student_name FROM savings_transactions t JOIN students s ON s.id = t.student_id
+              WHERE t.id IN ({$in}) AND t.deleted_at IS NULL ORDER BY t.student_id, t.id",
+            array_values($ids)
+        );
     }
 
     /** Tanggal pertama di mana saldo berjalan santri menjadi negatif (null bila tidak pernah). */

@@ -44,7 +44,10 @@ final class SavingsService
                     throw new SavingsRuleException(['student_id' => 'Santri tidak ditemukan.'], 'Santri tidak ditemukan.');
                 }
                 if ($student['status'] !== 'aktif') {
-                    throw new SavingsRuleException(['student_id' => 'Santri nonaktif tidak dapat menerima transaksi.'], 'Santri nonaktif tidak dapat menerima transaksi.');
+                    $msg = $student['status'] === 'alumni'
+                        ? 'Santri ini sudah lulus (alumni) dan tidak dapat menerima transaksi baru.'
+                        : 'Santri nonaktif tidak dapat menerima transaksi.';
+                    throw new SavingsRuleException(['student_id' => $msg], $msg);
                 }
 
                 if ($d['mutation'] === 'keluar') {
@@ -234,6 +237,77 @@ final class SavingsService
             return ['ok' => false, 'message' => $e->getMessage()];
         }
         return ['ok' => true, 'summary' => Savings::studentSummary((int) $old['student_id'])];
+    }
+
+    public const BULK_MAX = 200;
+
+    /** Rapikan daftar ID dari klien: bilangan bulat positif, unik. @return int[] */
+    public static function cleanIds(mixed $raw): array
+    {
+        if (!is_array($raw)) {
+            return [];
+        }
+        $ids = [];
+        foreach ($raw as $v) {
+            if ((is_int($v) || (is_string($v) && ctype_digit($v))) && (int) $v > 0) {
+                $ids[(int) $v] = (int) $v;
+            }
+        }
+        return array_values($ids);
+    }
+
+    /**
+     * Hapus (soft delete) banyak transaksi — SEMUA atau TIDAK SAMA SEKALI (satu transaksi DB).
+     * Ditolak bila ada ID yang tidak ditemukan/sudah terhapus, atau bila hasilnya membuat saldo santri mana pun negatif.
+     * @return array{ok:bool, message?:string, deleted?:int}
+     */
+    public static function bulkDelete(array $ids, array $actor): array
+    {
+        if ($ids === []) {
+            return ['ok' => false, 'message' => 'Pilih minimal satu transaksi.'];
+        }
+        if (count($ids) > self::BULK_MAX) {
+            return ['ok' => false, 'message' => 'Maksimal ' . self::BULK_MAX . ' transaksi per proses hapus.'];
+        }
+        try {
+            $n = Database::transaction(function () use ($ids, $actor): int {
+                $rows = Savings::findManyRaw($ids);
+                if (count($rows) !== count($ids)) {
+                    throw new SavingsRuleException([], 'Sebagian transaksi tidak ditemukan atau sudah dihapus. Muat ulang daftar lalu coba lagi.');
+                }
+                $students = array_values(array_unique(array_map(static fn (array $r): int => (int) $r['student_id'], $rows)));
+                sort($students);
+                foreach ($students as $sid) {
+                    Savings::lockStudent($sid); // urutan tetap → tidak ada deadlock antar proses
+                }
+                foreach ($rows as $r) {
+                    Savings::softDelete((int) $r['id'], (int) $actor['id']);
+                }
+                foreach ($students as $sid) {
+                    if (($neg = Savings::firstNegativeDate($sid)) !== null) {
+                        $name = '';
+                        foreach ($rows as $r) {
+                            if ((int) $r['student_id'] === $sid) {
+                                $name = (string) $r['student_name'];
+                                break;
+                            }
+                        }
+                        throw new SavingsRuleException([], 'Tidak ada yang dihapus: penghapusan ini membuat saldo ' . $name . ' negatif pada '
+                            . tanggal_id($neg, true) . '. Hapus juga transaksi keluar setelahnya, atau kurangi pilihan.');
+                    }
+                }
+                SyncState::bump('savings');
+                foreach ($rows as $r) {
+                    AuditLog::record('Menghapus transaksi', 'Tabungan', $r['transaction_code'],
+                        $r['student_name'] . ' — ' . ($r['mutation_type'] === 'masuk' ? 'Masuk ' : 'Keluar ') . rupiah((int) $r['amount'])
+                        . ' (' . tanggal_id($r['transaction_date'], true) . ') — ' . mb_substr((string) $r['description'], 0, 100) . ' [hapus massal]', $actor);
+                }
+                return count($rows);
+            });
+        } catch (SavingsRuleException $e) {
+            return ['ok' => false, 'message' => $e->getMessage()];
+        }
+        return ['ok' => true, 'deleted' => $n];
     }
 
     /** Ringkasan perubahan untuk audit log. */

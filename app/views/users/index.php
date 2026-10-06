@@ -32,14 +32,14 @@ $this->section('actions'); ?>
 
 <section class="card card-flush" aria-label="Daftar pengguna">
     <div class="table-wrap" id="table-wrap">
-        <table class="table" style="min-width:860px">
+        <table class="table table-stack">
             <thead id="thead"><tr>
-                <th data-sort="name">Nama</th>
+                <th data-sort="name" data-stack="title">Nama</th>
                 <th data-sort="username">Username</th>
                 <th data-sort="role">Peran</th>
                 <th data-sort="last_login">Login Terakhir</th>
                 <th data-sort="status">Status</th>
-                <th class="col-actions"><span class="sr-only">Aksi</span></th>
+                <th class="col-actions" data-stack="actions"><span class="sr-only">Aksi</span></th>
             </tr></thead>
             <tbody id="tbody"></tbody>
         </table>

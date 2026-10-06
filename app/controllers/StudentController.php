@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Auth;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Session;
 use App\Models\Student;
+use App\Services\SavingsService;
 use App\Services\StudentService;
 
 final class StudentController extends Controller
@@ -55,7 +57,7 @@ final class StudentController extends Controller
             return $this->error('Data santri tidak ditemukan.', 404);
         }
         if (!$r['ok']) {
-            return $this->error(self::FORM_ERROR, 422, $r['errors']);
+            return isset($r['message']) ? $this->error($r['message'], 422) : $this->error(self::FORM_ERROR, 422, $r['errors']);
         }
         return $this->success($r['student'], 'Data santri berhasil diperbarui.');
     }
@@ -70,6 +72,21 @@ final class StudentController extends Controller
         if (!empty($r['notfound'])) {
             return $this->error('Data santri tidak ditemukan.', 404);
         }
+        if (!$r['ok']) {
+            return $this->error($r['message'], 422);
+        }
         return $this->success($r['student'], $status === 'aktif' ? 'Santri diaktifkan.' : 'Santri dinonaktifkan.');
+    }
+
+    /** POST /api/students/bulk-delete  {ids: [..]} — arsip (soft delete); yang tidak boleh diarsipkan dilaporkan */
+    public function bulkDestroy(Request $request): Response
+    {
+        $user = Auth::user();
+        $r = StudentService::bulkArchive(SavingsService::cleanIds($request->post('ids')), ['id' => (int) $user['id'], 'name' => (string) $user['name']]);
+        if (!$r['ok']) {
+            return $this->error($r['message'], 422);
+        }
+        $msg = $r['deleted'] . ' santri dihapus (diarsipkan).' . ($r['skipped'] ? ' ' . count($r['skipped']) . ' santri dilewati.' : '');
+        return $this->success($r, $msg);
     }
 }

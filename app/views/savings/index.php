@@ -81,19 +81,20 @@ $this->endSection(); ?>
 </div>
 
 <section class="card card-flush mt-4" aria-label="Daftar transaksi">
+    <?php if ($canDelete): ?><div id="bulk-bar"></div><?php endif; ?>
     <div class="table-wrap" id="table-wrap">
-        <table class="table" style="min-width:1080px">
+        <table class="table table-stack">
             <thead id="thead"><tr>
                 <th data-sort="date">Tanggal</th>
-                <th data-sort="name">Nama</th>
+                <th data-sort="name" data-stack="title">Nama</th>
                 <th data-sort="jenjang">Jenjang</th>
                 <th data-sort="kelas">Kelas</th>
                 <th data-sort="month">Bulan</th>
                 <th data-sort="mutation">Mutasi</th>
                 <th data-sort="amount" class="num">Nominal</th>
-                <th>Keterangan</th>
+                <th data-stack="full">Keterangan</th>
                 <th class="num">Saldo</th>
-                <?php if ($canEdit || $canDelete): ?><th class="col-actions"><span class="sr-only">Aksi</span></th><?php endif; ?>
+                <?php if ($canEdit || $canDelete): ?><th class="col-actions" data-stack="actions"><span class="sr-only">Aksi</span></th><?php endif; ?>
             </tr></thead>
             <tbody id="tbody"></tbody>
         </table>
@@ -113,5 +114,6 @@ $this->endSection(); ?>
 <script src="<?= e(asset('js/table.js')) ?>" defer></script>
 <script src="<?= e(asset('js/combobox.js')) ?>" defer></script>
 <script src="<?= e(asset('js/savings-actions.js')) ?>" defer></script>
+<script src="<?= e(asset('js/bulk.js')) ?>" defer></script>
 <script src="<?= e(asset('js/savings-history.js')) ?>" defer></script>
 <?php $this->endSection(); ?>

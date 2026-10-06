@@ -318,8 +318,25 @@
     try { var items = JSON.parse(el.textContent || '[]'); items.forEach(function (m) { App.toast(m.type, m.message); }); } catch (e) { /* abaikan */ }
   }
 
+  /* ---------- Tombol Kembali ----------
+     <a data-back href="/halaman-induk">: bila pengunjung datang dari halaman lain di aplikasi ini, kembali ke halaman itu
+     (riwayat browser, filter ikut terjaga); bila tidak (dibuka langsung/disegarkan), ikuti tautan halaman induk. */
+  function initBack() {
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest ? e.target.closest('a[data-back]') : null;
+      if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) { return; }
+      try {
+        var ref = document.referrer ? new URL(document.referrer) : null;
+        var here = location.pathname;
+        if (ref && ref.origin === location.origin && ref.pathname !== here && !/\/login\/?$/.test(ref.pathname) && history.length > 1) {
+          e.preventDefault(); history.back();
+        }
+      } catch (err) { /* ikuti tautan */ }
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
-    initSidebar(); initDropdowns(); initForms(); initFlash();
+    initSidebar(); initDropdowns(); initForms(); initFlash(); initBack();
     $$('input[data-money]').forEach(bindMoney);
     $$('select[data-bind-label]').forEach(bindLabel);
   });

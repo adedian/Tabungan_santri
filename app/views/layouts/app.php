@@ -48,6 +48,9 @@ foreach (['success' => 'success', 'error' => 'error', 'warning' => 'warning', 'i
 
 <div class="main">
     <header class="topbar">
+        <a class="topbar-brand" href="<?= e(url('/dashboard')) ?>" aria-label="Tabungan Santri — ke Dashboard">
+            <?php $this->partial('partials/brand'); ?><span class="topbar-brand-name">Tabungan Santri</span>
+        </a>
         <button type="button" class="btn btn-ghost btn-icon menu-btn" data-sidebar-toggle aria-expanded="false" aria-controls="sidebar" aria-label="Buka menu">
             <?= icon('menu', 'icon-lg') ?>
         </button>
@@ -75,8 +78,8 @@ foreach (['success' => 'success', 'error' => 'error', 'warning' => 'warning', 'i
     </header>
 
     <main class="content page" id="main" tabindex="-1">
-        <?php if ($back = $this->get('back')): ?>
-            <a class="back-link" href="<?= e(url($back['url'])) ?>"><?= icon('chevron-left') ?><?= e($back['label']) ?></a>
+        <?php if ($back = $this->get('back', back_target())): ?>
+            <a class="back-link" href="<?= e(url($back['url'])) ?>" data-back title="Kembali ke <?= e($back['label']) ?>"><?= icon('arrow-left') ?>Kembali</a>
         <?php endif; ?>
         <?php if ($heading): ?>
             <div class="page-head">

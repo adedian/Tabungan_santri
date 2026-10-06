@@ -108,8 +108,8 @@ $this->endSection(); ?>
 
     <div id="pane-kelas">
         <div class="table-wrap" id="class-wrap">
-            <table class="table" style="min-width:720px">
-                <thead><tr><th>Jenjang</th><th>Kelas</th><th class="num">Santri</th><th class="num">Transaksi</th><th class="num">Masuk</th><th class="num">Keluar</th><th class="num">Selisih</th></tr></thead>
+            <table class="table table-stack">
+                <thead><tr><th data-stack="title">Jenjang</th><th>Kelas</th><th class="num">Santri</th><th class="num">Transaksi</th><th class="num">Masuk</th><th class="num">Keluar</th><th class="num">Selisih</th></tr></thead>
                 <tbody id="class-body"></tbody>
                 <tfoot id="class-foot"></tfoot>
             </table>
@@ -121,9 +121,9 @@ $this->endSection(); ?>
 
     <div id="pane-santri" hidden>
         <div class="table-wrap" id="student-wrap">
-            <table class="table" style="min-width:860px">
+            <table class="table table-stack">
                 <thead id="thead"><tr>
-                    <th data-sort="name">Nama</th><th data-sort="kelas">Kelas</th>
+                    <th data-sort="name" data-stack="title">Nama</th><th data-sort="kelas">Kelas</th>
                     <th data-sort="count" class="num">Transaksi</th><th data-sort="masuk" class="num">Masuk</th><th data-sort="keluar" class="num">Keluar</th>
                     <th data-sort="net" class="num">Selisih</th><th data-sort="saldo" class="num" id="th-saldo">Saldo</th>
                 </tr></thead>

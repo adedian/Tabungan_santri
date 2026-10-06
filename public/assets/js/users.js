@@ -47,9 +47,10 @@
   /* ---------- Render ---------- */
   var tbody = $('#tbody'), wrap = $('#table-wrap'), empty = $('#empty');
 
-  function iconBtn(parent, icon, label, onClick) {
+  function iconBtn(parent, icon, label, onClick, short) {
     var b = el('button', 'btn btn-ghost btn-icon btn-sm', null, parent); b.type = 'button';
     b.title = label; b.setAttribute('aria-label', label); b.appendChild(App.icon(icon));
+    if (short) { b.dataset.short = short; } // teks pendek yang tampil di kartu layar sempit
     b.addEventListener('click', onClick);
     return b;
   }
@@ -69,11 +70,11 @@
       el('td', 'nowrap tabular' + (u.last_login_at ? '' : ' muted'), fmtLogin(u.last_login_at), tr);
       el('td', null, null, tr).appendChild(el('span', 'badge ' + (u.status === 'aktif' ? 'badge-success' : 'badge-muted'), u.status === 'aktif' ? 'Aktif' : 'Nonaktif'));
       var ac = el('td', 'col-actions', null, tr);
-      iconBtn(ac, 'pencil', 'Ubah ' + u.name, function () { openForm(u); });
-      iconBtn(ac, 'lock', 'Atur ulang kata sandi ' + u.name, function () { openPassword(u); });
+      iconBtn(ac, 'pencil', 'Ubah ' + u.name, function () { openForm(u); }, 'Ubah');
+      iconBtn(ac, 'lock', 'Atur ulang kata sandi ' + u.name, function () { openPassword(u); }, 'Kata sandi');
       if (!self) {
         var off = u.status === 'aktif';
-        iconBtn(ac, off ? 'user-x' : 'user-check', (off ? 'Nonaktifkan ' : 'Aktifkan ') + u.name, function () { toggleStatus(u); });
+        iconBtn(ac, off ? 'user-x' : 'user-check', (off ? 'Nonaktifkan ' : 'Aktifkan ') + u.name, function () { toggleStatus(u); }, off ? 'Nonaktifkan' : 'Aktifkan');
       }
     });
     if (!has) {

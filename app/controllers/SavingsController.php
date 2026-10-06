@@ -11,6 +11,7 @@ use App\Core\Session;
 use App\Models\Savings;
 use App\Models\Student;
 use App\Models\SyncState;
+use App\Services\PromotionService;
 use App\Services\SavingsService;
 use App\Services\StudentService;
 
@@ -70,12 +71,17 @@ final class SavingsController extends Controller
         if ($profile === null) {
             throw new HttpException(404);
         }
+        if ($profile['student']['status'] === 'alumni') { // alumni punya halaman sendiri (menu Tabungan Alumni)
+            return $this->redirect('/tabungan/alumni/' . $id);
+        }
         // student_id selalu dipaksa dari URL; filter lain mengikuti query string
         $list = SavingsService::listing(array_merge($request->query(), ['student_id' => $id]));
 
         return $this->view('savings/student', ['initial' => [
             'profile'    => $profile,
             'list'       => $list,
+            'history'    => PromotionService::history($id),
+            'is_alumni'  => false,
             'can_edit'   => can('savings.edit'),
             'can_delete' => can('savings.delete'),
             'can_create' => can('savings.create'),
@@ -125,6 +131,17 @@ final class SavingsController extends Controller
             return $this->error($r['message'], 422);
         }
         return $this->success(['summary' => $r['summary']], 'Transaksi berhasil dihapus');
+    }
+
+    /** POST /api/savings/bulk-delete  {ids: [..]} — hapus (soft delete) banyak transaksi, semua atau tidak sama sekali */
+    public function bulkDestroy(Request $request): Response
+    {
+        $user = Auth::user();
+        $r = SavingsService::bulkDelete(SavingsService::cleanIds($request->post('ids')), ['id' => (int) $user['id'], 'name' => (string) $user['name']]);
+        if (!$r['ok']) {
+            return $this->error($r['message'], 422);
+        }
+        return $this->success(['deleted' => $r['deleted']], $r['deleted'] . ' transaksi berhasil dihapus.');
     }
 
     /** GET /api/savings/balance?student_id= */

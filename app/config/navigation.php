@@ -13,17 +13,19 @@ return [
     ['label' => 'Tabungan', 'items' => [
         ['label' => 'Tambah Tabungan',  'icon' => 'circle-plus', 'path' => '/tabungan/tambah', 'perm' => 'savings.create', 'ready' => true],
         ['label' => 'Riwayat Tabungan', 'icon' => 'history',     'path' => '/tabungan',        'perm' => 'savings.view',   'ready' => true],
+        ['label' => 'Tabungan Alumni',  'icon' => 'graduation-cap', 'path' => '/tabungan/alumni', 'perm' => 'alumni.view',   'ready' => true],
     ]],
     ['label' => 'Santri', 'items' => [
-        ['label' => 'Data Santri', 'icon' => 'users', 'path' => '/santri', 'perm' => 'students.view', 'ready' => true],
+        ['label' => 'Data Santri',     'icon' => 'users',          'path' => '/santri',           'perm' => 'students.view',    'ready' => true],
+        ['label' => 'Kenaikan Kelas',  'icon' => 'trending-up',    'path' => '/santri/kenaikan',  'perm' => 'promotions.manage', 'ready' => true],
     ]],
     ['label' => 'Laporan', 'items' => [
         ['label' => 'Laporan Tabungan', 'icon' => 'file-chart', 'path' => '/laporan', 'perm' => 'reports.view', 'ready' => true],
+        ['label' => 'Rekap Alumni',     'icon' => 'graduation-cap', 'path' => '/laporan/alumni', 'perm' => 'alumni.view', 'ready' => true],
     ]],
     ['label' => 'Sistem', 'items' => [
         ['label' => 'Pengguna',         'icon' => 'user-round',  'path' => '/pengguna',   'perm' => 'users.manage',    'ready' => true],
         ['label' => 'Pengaturan',       'icon' => 'settings',    'path' => '/pengaturan', 'perm' => 'settings.manage', 'ready' => true],
         ['label' => 'Audit Log',        'icon' => 'scroll-text', 'path' => '/audit',      'perm' => 'audit.view',      'ready' => true],
-        ['label' => 'Panduan Komponen', 'icon' => 'palette',     'path' => '/styleguide', 'perm' => 'settings.manage', 'ready' => true],
     ]],
 ];

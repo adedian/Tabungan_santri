@@ -44,6 +44,7 @@
     setStat('keluar', t.keluar, setMoney);
     setStat('santri', s.santri, function (n, v) { n.textContent = App.formatMoney(v); });
     var note = $('[data-note="saldo"]'); if (note) { note.textContent = App.formatMoney(s.santri) + ' santri aktif'; }
+    var al = $('[data-note="alumni"]'); if (al && s.alumni) { al.textContent = 'Alumni (terpisah): ' + App.formatMoney(s.alumni.alumni) + ' orang • ' + App.rupiah(s.alumni.saldo); }
     var tx = $('[data-note="transaksi"]'); if (tx) { tx.textContent = App.formatMoney(t.transaksi); }
     var j = {}; s.jenjang.forEach(function (x) { j[x.jenjang] = x.santri; });
     var jn = $('[data-note="jenjang"]'); if (jn) { jn.textContent = 'TK ' + (j.TK || 0) + ' • SD ' + (j.SD || 0); }

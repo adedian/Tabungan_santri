@@ -99,6 +99,29 @@ function nav_groups(): array
     return $groups;
 }
 
+/**
+ * Tujuan cadangan tombol "Kembali" (halaman induk yang logis). Tombol memakai riwayat browser bila pengunjung datang dari
+ * halaman lain di aplikasi ini, jadi tujuan ini hanya dipakai saat halaman dibuka langsung. null = tanpa tombol (Dashboard).
+ * @return array{url:string,label:string}|null
+ */
+function back_target(): ?array
+{
+    $path = App\Core\Request::current()?->path() ?? '/';
+    $rules = [
+        '#^/dashboard$#'              => null,
+        '#^/tabungan/alumni/\d+$#'    => ['/tabungan/alumni', 'Tabungan Alumni'],
+        '#^/tabungan/santri/\d+$#'    => ['/tabungan', 'Riwayat Tabungan'],
+        '#^/laporan/alumni$#'         => ['/laporan', 'Laporan Tabungan'],
+        '#^/santri/kenaikan$#'        => ['/santri', 'Data Santri'],
+    ];
+    foreach ($rules as $re => $target) {
+        if (preg_match($re, $path)) {
+            return $target === null ? null : ['url' => $target[0], 'label' => $target[1]];
+        }
+    }
+    return ['url' => '/dashboard', 'label' => 'Dashboard'];
+}
+
 /** Apakah halaman dengan path ini sudah dibangun (menurut config/navigation.php)? */
 function nav_ready(string $path): bool
 {

@@ -21,6 +21,13 @@ Sistem tabungan santri berbasis web — PHP Native (8.0+), MySQL/MariaDB, PDO, t
 | 14 | Audit log (halaman + filter: cari, modul, pengguna, tanggal, sort, paginasi) | ✅ |
 | 15 | Manajemen Pengguna (tambah/ubah, peran, aktif/nonaktif, atur ulang kata sandi; khusus Super Admin) | ✅ |
 | 16 | Pengaturan (nama lembaga + unggah logo; khusus Super Admin) | ✅ |
+| 17 | Finalisasi: menu "Segera" dimatikan, header keamanan, alat produksi (`tools/`), uji regresi lintas peran, checklist produksi | ✅ |
+
+**Semua phase selesai — versi final 1.0.**
+
+| Revisi | Isi | Status |
+|---|---|---|
+| 1 | Kenaikan Kelas (review → pilih → konfirmasi → proses, riwayat kelas, anti-ganda), Tabungan Alumni (Tarik Data Detail/Rekap), hapus massal (transaksi = soft delete, santri = arsip), tombol Kembali di semua halaman, responsif total (tabel → kartu, tanpa overflow), Panduan Komponen dihapus | ✅ |
 
 ## Instalasi (XAMPP)
 
@@ -30,6 +37,12 @@ Sistem tabungan santri berbasis web — PHP Native (8.0+), MySQL/MariaDB, PDO, t
    mysql -u root < database/schema.sql
    mysql -u root < database/seed.sql     # data dummy, hanya untuk testing
    ```
+   **Memperbarui database yang sudah berisi data** (tanpa menghapus apa pun): cadangkan dulu, lalu jalankan migrasi.
+   ```bash
+   php tools/backup.php
+   php tools/migrate.php
+   ```
+   Migrasi (`database/migrations/*.sql`) hanya menambah kolom/tabel, tercatat di tabel `schema_migrations`, dan aman dijalankan ulang.
 3. Cek `app/config/database.php` (default XAMPP: user `root`, tanpa password).
 4. Buka <http://localhost/Tabungan_santri/> — cek <http://localhost/Tabungan_santri/health>.
 
@@ -52,9 +65,40 @@ Ketiganya memakai satu kata sandi demo yang **sengaja tidak ditulis di repo publ
 
 Login dapat memakai username **atau** email (tidak peka huruf besar/kecil).
 
+## Kenaikan kelas
+
+- Menu **Santri → Kenaikan Kelas** (`/santri/kenaikan`), izin `promotions.manage` (Admin ke atas). **Tidak pernah otomatis**: Pilih kelas → Tinjau & tentukan status → Pratinjau/konfirmasi → Proses.
+- Tahun ajaran (Juli–Juni): "Tahun Ajaran Asal" dapat dipilih (bawaan = tahun ajaran yang baru berakhir/akan berakhir), tujuan = +1 tahun. Satu proses = satu kelas (`jenjang` + `kelas`).
+- Tangga kelas (`app/services/ClassLadder.php`): SD `1A → 2A … 5A → 6A` (rombel dipertahankan; kelas tujuan boleh diubah selama tingkatnya benar); TK `TK A → TK B`, `TK B → SD 1A`; format kelas lain tidak dapat dinaikkan otomatis.
+- **SD kelas 6 + Naik = LULUS** → status `alumni` (tidak pernah "kelas 7"). **Tidak naik** → kelas tidak berubah. Semua santri di daftar wajib punya status sebelum tombol Proses aktif; kotak centang hanya untuk menandai massal ("Tandai Naik / Tidak Naik").
+- Satu transaksi DB: semua santri berubah atau tidak sama sekali. Transaksi tabungan **tidak diubah/dipindah/diduplikasi**; saldo tetap dari ledger yang sama.
+- **Anti-ganda** (dijaga di database): `UNIQUE (tahun asal, jenjang, kelas)` pada `class_promotions` dan `UNIQUE (santri, tahun asal)` pada `student_class_history` → kelas yang sama tidak bisa diproses dua kali, dan santri yang baru naik tidak ikut dinaikkan lagi di tahun yang sama. Dua operator bersamaan: satu berhasil, satu menerima "sudah diproses".
+- Riwayat: `student_class_history` (tahun asal/tujuan, kelas sebelum/sesudah, status naik/tidak_naik/lulus, pemroses, waktu) — tampil sebagai **Riwayat Kelas** di detail santri/alumni; tabel **Riwayat Proses** di halaman Kenaikan Kelas; audit log modul `Kenaikan Kelas` (jumlah naik/lulus/tidak naik).
+- Santri nonaktif tidak ikut proses. Mengubah kelas manual di Data Santri tidak membuat riwayat kenaikan.
+
+## Tabungan alumni
+
+- Alumni = santri berstatus `alumni` (`graduated_at`, `graduation_year`, `graduation_academic_year`; jenjang & kelas terakhir tetap di baris santri). **Tidak ada tabel transaksi baru**: transaksi tetap di ledger yang sama dan saldo tetap dari `v_student_balances` → mustahil hitung ganda.
+- Menu **Tabungan → Tabungan Alumni** (`/tabungan/alumni`) dan **Laporan → Rekap Alumni** (`/laporan/alumni`); izin `alumni.view` (semua peran). **Tarik Data**: *Detail* (tabel per alumni → halaman detail dengan seluruh riwayat transaksi + riwayat kelas) atau *Rekap* (ringkasan + tabel per tahun lulus, atau per kelas terakhir bila satu tahun dipilih). Filter: tahun lulus, tahun ajaran, cari.
+- Alumni **tidak muncul** di Data Santri, pilihan form tabungan, dan proses kenaikan; transaksi baru untuk alumni ditolak server. Alumni tidak dapat diubah/dinonaktifkan dari Data Santri.
+- Dashboard: "Total Saldo" hanya santri (bukan alumni); saldo alumni ditampilkan terpisah di kartu yang sama. Riwayat & Laporan tetap berbasis ledger (transaksi alumni sebelum lulus tetap ikut pada periodenya).
+
+## Hapus massal
+
+- Tombol **Pilih** → kotak centang muncul → **Pilih Semua** (hanya halaman yang tampil) → **Hapus Terpilih (n)** → dialog konfirmasi. Modul bersama `App.Bulk` (`assets/js/bulk.js`). Ada di **Riwayat Tabungan**, **Detail Tabungan/Alumni**, dan **Data Santri**.
+- **Transaksi** (`POST /api/savings/bulk-delete`, izin `savings.delete`): *soft delete* (`deleted_at` + `deleted_by`), tidak dihitung dalam saldo, tercatat di audit log per transaksi. **Semua-atau-tidak-sama-sekali**: ditolak seluruhnya bila ada ID yang tidak ada/sudah terhapus, atau bila hasilnya membuat saldo santri negatif. Maks. 200 ID; semua ID divalidasi (bilangan bulat positif), query `WHERE id IN (…)` berparameter.
+- **Santri** (`POST /api/students/bulk-delete`, izin `students.manage`): **arsip** (`deleted_at`), data/riwayat kelas/transaksi tetap ada. Santri yang masih bersaldo atau alumni dilewati dan dilaporkan satu per satu.
+- Tidak disediakan untuk Audit Log (tidak boleh diubah), Pengguna (nonaktifkan saja; terhubung ke transaksi), dan tabel ringkasan/laporan.
+
+## Tombol Kembali & responsif
+
+- **← Kembali** di semua halaman (kecuali Dashboard): kembali ke halaman asal bila pengunjung datang dari halaman lain di aplikasi (riwayat browser, filter ikut terjaga); bila dibuka langsung, menuju halaman induk (`back_target()` di `app/helpers/functions.php`).
+- Desktop: sidebar; < 1024 px: topbar `Logo … ☰` dengan sidebar *off-canvas* yang menutup setelah memilih menu. Form 1 kolom di ponsel, modal maksimal selebar layar dan dapat di-scroll, judul memakai `clamp()`.
+- **Tidak ada overflow horizontal halaman.** Audit otomatis: `tools/responsive-audit.js` (tempel di konsol browser yang sudah login) membandingkan `scrollWidth` dengan lebar tampilan untuk 11 lebar (360–1920 px) dan melaporkan elemen yang keluar bingkai: `await __auditPages(['/dashboard','/tabungan','/santri'])`.
+
 ## Menjalankan di produksi (checklist)
 
-1. Impor **`database/schema.sql` saja** (jangan `seed.sql`). Salin `app/config/database.example.php` → `database.php`, isi kredensial MySQL khusus aplikasi (bukan `root`).
+1. Instalasi baru: impor **`database/schema.sql` saja** (jangan `seed.sql`). Memperbarui database lama: `php tools/backup.php` lalu `php tools/migrate.php`. Salin `app/config/database.example.php` → `database.php`, isi kredensial MySQL khusus aplikasi (bukan `root`).
 2. Buat Super Admin pertama dari terminal (kata sandi ditanya interaktif, tidak masuk riwayat perintah):
    ```bash
    php tools/create-admin.php superadmin "Nama Admin"
@@ -100,17 +144,19 @@ public/        front controller + assets (satu-satunya folder yang dapat diakses
 app/core/      Router, Request, Response, Session, Csrf, Database, View, Validator, ErrorHandler
 app/controllers  app/models  app/services  app/middleware  app/views  app/helpers  app/config
 routes/web.php daftar route
-database/      schema.sql, seed.sql
+database/      schema.sql, seed.sql, migrations/
+tools/         create-admin.php, backup.php, migrate.php (khusus CLI), responsive-audit.js (uji overflow)
 storage/       log & sesi (di luar web)
 ```
 
 ## Design system
 
-- Katalog komponen hidup: `/styleguide` (khusus Super Admin). **Lihat dulu di sana sebelum membuat UI baru.**
+- Pakai ulang komponen yang sudah ada di `components.css` (tombol, kartu, badge, tabel, modal, dsb.) dan token di `tokens.css`. Halaman katalog komponen sudah dihapus.
 - CSS: `tokens.css` (satu-satunya tempat warna/ukuran) → `base.css` → `layout.css` → `components.css`. Jangan hardcode warna.
 - Layout view: `layouts/app` (halaman login-only), `layouts/auth`, `layouts/plain` (error). Di view: `$this->set('heading', ...)`, `$this->set('lead', ...)`, section `actions`/`scripts`.
 - Ikon: `icon('nama')` dari `public/assets/icons/sprite.svg` (tambah `<symbol>` baru bila perlu).
 - JS (`App.*`): `api()` (CSRF otomatis, 401 → login), `toast()`, `confirm()`, `setLoading()`, `rupiah()`. Atribut: `data-money`, `data-bind-label`, `data-loading-text`, `data-confirm`.
+- Tabel data: beri kelas `table table-stack` dan `data-stack="title|full|actions"` pada `<th>`; label sel diisi otomatis dari `<th>` (`App.Table.stack`). Saat kontainer tabel < 800 px tabel tampil sebagai **kartu** (tanpa scroll horizontal).
 - Menu sidebar: `app/config/navigation.php` (`ready => true` saat halaman selesai). `app.show_planned_menu` sudah `false` (final); item baru yang belum siap bisa ditandai `ready => false`.
 - Logo: placeholder bawaan sampai Super Admin mengunggah logo di **Pengaturan** (`partials/brand.php`).
 
@@ -229,7 +275,7 @@ storage/       log & sesi (di luar web)
 ## Konvensi penting
 
 - **Saldo** selalu dihitung dari ledger (`SUM masuk − SUM keluar`), lihat view `v_student_balances`. Tidak ada kolom saldo.
-- **Soft delete**: semua query transaksi wajib memfilter `deleted_at IS NULL`.
+- **Soft delete**: semua query transaksi wajib memfilter `deleted_at IS NULL`; santri yang diarsipkan (`students.deleted_at`) tidak pernah ikut daftar/pilihan. Alumni hanya muncul lewat modul Alumni (`students.status = 'alumni'`).
 - **CSRF** otomatis untuk semua POST/PUT/PATCH/DELETE (field `_csrf` atau header `X-CSRF-Token`).
 - **CSP**: tidak ada `<script>` inline. Kirim data ke JS lewat atribut `data-*`.
 - **Output** di view selalu lewat `e()`.

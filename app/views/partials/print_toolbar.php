@@ -7,7 +7,7 @@ $hidden = $hidden ?? [];
 ?>
 <div class="print-toolbar no-print">
     <div class="print-toolbar-inner">
-        <a class="btn btn-ghost btn-sm" href="<?= e(url($back[0])) ?>"><?= icon('chevron-left') ?><?= e($back[1]) ?></a>
+        <a class="btn btn-ghost btn-sm" href="<?= e(url($back[0])) ?>" data-back title="Kembali ke <?= e($back[1]) ?>"><?= icon('arrow-left') ?>Kembali</a>
         <strong class="print-toolbar-title">Pratinjau cetak</strong>
         <span class="muted small print-summary"><?= e($summary ?? '') ?></span>
         <span class="topbar-spacer"></span>
