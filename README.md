@@ -110,7 +110,7 @@ Login dapat memakai username **atau** email (tidak peka huruf besar/kecil).
 
 ## Hosting tanpa SSH (mis. InfinityFree)
 
-`php tools/package-hosting.php` membuat folder `deploy/` (di-ignore Git): isi `htdocs/` siap diunggah lewat FTP, `hosting-schema.sql` (tanpa CREATE DATABASE), `hosting-admin.sql` (Super Admin awal dengan kata sandi sementara acak), dan `PANDUAN-HOSTING.md` (langkah demi langkah). Seed/akun demo tidak ikut; kredensial lokal tidak ikut — `app/config/database.php` berisi placeholder untuk diisi di komputer Anda sebelum unggah.
+`php tools/package-hosting.php` membuat folder `deploy/` (di-ignore Git): isi `htdocs/` siap diunggah lewat FTP (termasuk **pemasang web sekali pakai** `public/install.php`: wajib kode pemasangan, mengisi koneksi database, membuat tabel & akun admin pilihan pemilik, lalu terkunci), `hosting-schema.sql`/`hosting-admin.sql` (jalur manual lewat phpMyAdmin), dan `PANDUAN-HOSTING.md`. Seed/akun demo tidak ikut; kredensial lokal tidak ikut — `app/config/database.php` berisi placeholder untuk diisi di komputer Anda sebelum unggah.
 
 ## Menjalankan di produksi (checklist)
 

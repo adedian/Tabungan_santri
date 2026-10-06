@@ -93,7 +93,15 @@ if (stripos((string) $schema, 'CREATE DATABASE') !== false || preg_match('/^USE\
 }
 file_put_contents($out . '/hosting-schema.sql', $schema);
 
-// Super Admin awal dengan kata sandi sementara acak
+// Pemasang web sekali pakai: public/install.php + skema di app/install/ (dilindungi app/.htaccess)
+$alphabetKey = 'abcdefghjkmnpqrstuvwxyz23456789';
+$setupKey = '';
+for ($i = 0; $i < 10; $i++) { $setupKey .= $alphabetKey[random_int(0, strlen($alphabetKey) - 1)]; }
+@mkdir($web . '/app/install', 0775, true);
+copy($out . '/hosting-schema.sql', $web . '/app/install/schema.sql');
+file_put_contents($web . '/public/install.php', str_replace('__SETUP_KEY_SHA256__', hash('sha256', $setupKey), (string) file_get_contents(__DIR__ . '/hosting-install.php')));
+
+// Super Admin awal dengan kata sandi sementara acak (jalur manual lewat phpMyAdmin; pemasang web tidak memakainya)
 $alphabet = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
 $pw = '';
 for ($i = 0; $i < 14; $i++) { $pw .= $alphabet[random_int(0, strlen($alphabet) - 1)]; }
@@ -102,7 +110,7 @@ file_put_contents($out . '/hosting-admin.sql',
     "-- Akun Super Admin awal. Masuk dengan username \"admin\" lalu SEGERA ganti kata sandi (menu Pengguna).\n"
     . "INSERT INTO `users` (`name`, `username`, `email`, `password`, `role`, `status`)\n"
     . "VALUES ('Administrator', 'admin', NULL, '" . $hash . "', 'super_admin', 'aktif');\n");
-file_put_contents($out . '/AKUN-AWAL.local.txt', "username: admin\nkata sandi sementara: {$pw}\n(Ganti segera setelah login. Berkas ini jangan dibagikan.)\n");
+file_put_contents($out . '/AKUN-AWAL.local.txt', "KODE PEMASANGAN (untuk https://DOMAIN/install.php): {$setupKey}\n\n[Jalur manual lewat phpMyAdmin saja]\nusername: admin\nkata sandi sementara: {$pw}\n(Ganti segera setelah login. Berkas ini jangan dibagikan.)\n");
 
 // Zip
 $zipPath = $out . '/tabungan-santri-htdocs.zip';
@@ -118,4 +126,5 @@ copy(__DIR__ . '/hosting-guide.md', $out . '/PANDUAN-HOSTING.md');
 echo "Paket siap di: $out\n";
 echo "  htdocs/ ($n berkas) + zip " . round(filesize($zipPath) / 1024) . " KB\n";
 echo "  hosting-schema.sql, hosting-admin.sql, PANDUAN-HOSTING.md\n";
-echo "  Kata sandi sementara akun admin: {$pw}\n";
+echo "  Kode pemasangan (install.php): {$setupKey}\n";
+echo "  [jalur manual] kata sandi sementara akun admin: {$pw}\n";
