@@ -21,7 +21,7 @@ return [
         ['label' => 'Laporan Tabungan', 'icon' => 'file-chart', 'path' => '/laporan', 'perm' => 'reports.view', 'ready' => true],
     ]],
     ['label' => 'Sistem', 'items' => [
-        ['label' => 'Pengguna',         'icon' => 'user-round',  'path' => '/pengguna',   'perm' => 'users.manage',    'ready' => false],
+        ['label' => 'Pengguna',         'icon' => 'user-round',  'path' => '/pengguna',   'perm' => 'users.manage',    'ready' => true],
         ['label' => 'Pengaturan',       'icon' => 'settings',    'path' => '/pengaturan', 'perm' => 'settings.manage', 'ready' => false],
         ['label' => 'Audit Log',        'icon' => 'scroll-text', 'path' => '/audit',      'perm' => 'audit.view',      'ready' => true],
         ['label' => 'Panduan Komponen', 'icon' => 'palette',     'path' => '/styleguide', 'perm' => 'settings.manage', 'ready' => true],

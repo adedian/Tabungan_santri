@@ -19,6 +19,7 @@ Sistem tabungan santri berbasis web — PHP Native (8.0+), MySQL/MariaDB, PDO, t
 | 12 | Laporan Tabungan (ringkasan, rekap per kelas/santri, grafik periode, ekspor Excel/CSV) | ✅ |
 | 13 | Sistem cetak (Rekap per Nama sesuai contoh Excel, cetak massal per kelas; cetak laporan = format sementara) | ✅ |
 | 14 | Audit log (halaman + filter: cari, modul, pengguna, tanggal, sort, paginasi) | ✅ |
+| 15 | Manajemen Pengguna (tambah/ubah, peran, aktif/nonaktif, atur ulang kata sandi; khusus Super Admin) | ✅ |
 
 ## Instalasi (XAMPP)
 
@@ -46,7 +47,7 @@ Ketiganya memakai satu kata sandi demo yang **sengaja tidak ditulis di repo publ
 `AKUN-DEMO.local.md` (berkas lokal, di-ignore Git). Bila berkas itu tidak ada, buat akun/kata sandi sendiri (lihat catatan di bawah).
 
 > ⚠️ **Jangan impor `database/seed.sql` ke server sungguhan.** Berkas itu hanya untuk pengujian dan memuat akun demo dengan kata sandi bawaan.
-> Di production: impor `schema.sql` saja, lalu buat pengguna sendiri dengan `password_hash()` (halaman Pengguna menyusul).
+> Di production: impor `schema.sql` saja, lalu buat akun Super Admin pertama dengan `password_hash()` (satu `INSERT` ke tabel `users`); pengguna lain dibuat lewat halaman **Pengguna**.
 
 Login dapat memakai username **atau** email (tidak peka huruf besar/kecil).
 
@@ -127,6 +128,17 @@ storage/       log & sesi (di luar web)
 - Nama pengguna disimpan sebagai snapshot di tiap catatan, jadi tetap terbaca walau akun diubah/dihapus. Tanpa polling realtime: tombol **Muat ulang**.
 - Modul yang tercatat saat ini: `Auth`, `Tabungan`, `Santri`, `Laporan`, `Cetak`. Modul baru otomatis muncul di dropdown filter.
 - File: `app/models/AuditLog.php`, `app/services/AuditService.php`, `app/controllers/AuditController.php`, `app/views/audit/index.php`, `public/assets/js/audit.js`.
+
+## Manajemen pengguna
+
+- Halaman `/pengguna` (menu Sistem → Pengguna); API `GET/POST /api/users`, `PUT /api/users/{id}`, `PUT /api/users/{id}/status`, `PUT /api/users/{id}/password`. Izin `users.manage`: **hanya Super Admin** (403 untuk yang lain).
+- Daftar: cari (nama/username/email), filter peran & status, sort (nama, username, peran, login terakhir, status), paginasi 10/25/50. Hash kata sandi tidak pernah dikirim ke browser.
+- **Username**: 3–50 karakter, huruf kecil/angka/`.`/`_`/`-` (disimpan huruf kecil; login tidak peka huruf besar/kecil). Email opsional, unik, dapat dipakai login. Duplikat ditolak sebagai galat kolom.
+- **Kata sandi**: minimal 8 karakter, maksimal 72 byte (batas bcrypt), tidak boleh sama dengan username. Tidak pernah dicatat di audit log. Atur ulang kata sandi tidak mengakhiri sesi yang sedang berjalan milik pengguna itu.
+- **Pengaman** (ditegakkan di server): akun sendiri tidak dapat dinonaktifkan atau diubah perannya; Super Admin aktif **terakhir** tidak dapat dinonaktifkan/diturunkan (dicek di dalam transaksi dengan `SELECT … FOR UPDATE`, jadi aman terhadap dua perubahan serentak).
+- Pengguna yang dinonaktifkan terlempar pada request berikutnya; perubahan peran berlaku seketika (peran dimuat ulang dari DB tiap request).
+- Semua aksi tercatat di Audit Log (modul `Pengguna`).
+- File: `app/models/User.php`, `app/services/UserService.php`, `app/controllers/UserController.php`, `app/views/users/index.php`, `public/assets/js/users.js`.
 
 ## Laporan & ekspor
 

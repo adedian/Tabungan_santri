@@ -12,6 +12,7 @@ use App\Controllers\StudentController;
 use App\Controllers\StyleguideController;
 use App\Controllers\SyncController;
 use App\Controllers\SystemController;
+use App\Controllers\UserController;
 
 /** @var App\Core\Router $router */
 
@@ -33,6 +34,14 @@ $router->group(['middleware' => ['auth']], function ($router) {
     // Audit log
     $router->get('/audit', [AuditController::class, 'index'], ['can:audit.view']);
     $router->get('/api/audit/list', [AuditController::class, 'list'], ['can:audit.view']);
+
+    // Pengguna (Super Admin)
+    $router->get('/pengguna', [UserController::class, 'index'], ['can:users.manage']);
+    $router->get('/api/users', [UserController::class, 'list'], ['can:users.manage']);
+    $router->post('/api/users', [UserController::class, 'store'], ['can:users.manage']);
+    $router->put('/api/users/{id:int}', [UserController::class, 'update'], ['can:users.manage']);
+    $router->put('/api/users/{id:int}/status', [UserController::class, 'status'], ['can:users.manage']);
+    $router->put('/api/users/{id:int}/password', [UserController::class, 'password'], ['can:users.manage']);
 
     // Cetak
     $router->get('/print/rekap/{id:int}', [PrintController::class, 'rekap'], ['can:savings.view']);
