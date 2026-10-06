@@ -18,7 +18,7 @@ Sistem tabungan santri berbasis web — PHP Native (8.0+), MySQL/MariaDB, PDO, t
 | 11 | Detail Tabungan santri (profil mini, saldo, riwayat per santri, ubah/hapus, tautan dari nama) | ✅ |
 | 12 | Laporan Tabungan (ringkasan, rekap per kelas/santri, grafik periode, ekspor Excel/CSV) | ✅ |
 | 13 | Sistem cetak (Rekap per Nama sesuai contoh Excel, cetak massal per kelas; cetak laporan = format sementara) | ✅ |
-| 14 | Audit log (halaman + filter) | ⏭ berikutnya |
+| 14 | Audit log (halaman + filter: cari, modul, pengguna, tanggal, sort, paginasi) | ✅ |
 
 ## Instalasi (XAMPP)
 
@@ -117,6 +117,16 @@ storage/       log & sesi (di luar web)
 - **Cetak Laporan** — `/print/laporan` (tombol "Cetak" di Laporan): **format SEMENTARA**, menunggu contoh cetakan. Strukturnya siap: ubah `views/print/laporan.php`.
 - Pratinjau di layar (kertas A4 potret, margin 15 mm) lalu tombol **Cetak**; bilah alat disembunyikan saat dicetak (`@media print`). Di dialog cetak: skala 100%, matikan "Header dan footer".
 - Setiap cetak tercatat di audit log (modul `Cetak`) sekali per halaman. File: `public/assets/css/print.css`, `app/services/PrintService.php`, `app/views/print/`.
+
+## Audit log
+
+- Halaman `/audit` (menu Sistem → Audit Log); API `GET /api/audit/list`. Izin `audit.view`: **Admin ke atas** (operator ditolak 403, baik halaman maupun API).
+- **Hanya baca**: aplikasi tidak menyediakan ubah/hapus catatan. Pencatatan lewat `AuditLog::record()` (kegagalan mencatat tidak menggagalkan aksi utama).
+- Filter: cari (pengguna, aksi, keterangan, nomor referensi, IP — tiap kata harus cocok), modul, pengguna, dari/sampai tanggal (+ rentang cepat). Nilai tak sah **diabaikan**, bukan error; rentang terbalik ditukar. Rentang tanggal memakai `created_at >= dari AND created_at < sampai+1 hari` agar indeks terpakai.
+- Sort: waktu (default terbaru), pengguna, modul, aksi. Paginasi 25/50/100 (default 50). Ringkasan (catatan, pengguna, modul, aktivitas terakhir) dihitung dari seluruh hasil filter.
+- Nama pengguna disimpan sebagai snapshot di tiap catatan, jadi tetap terbaca walau akun diubah/dihapus. Tanpa polling realtime: tombol **Muat ulang**.
+- Modul yang tercatat saat ini: `Auth`, `Tabungan`, `Santri`, `Laporan`, `Cetak`. Modul baru otomatis muncul di dropdown filter.
+- File: `app/models/AuditLog.php`, `app/services/AuditService.php`, `app/controllers/AuditController.php`, `app/views/audit/index.php`, `public/assets/js/audit.js`.
 
 ## Laporan & ekspor
 

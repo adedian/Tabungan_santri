@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+use App\Controllers\AuditController;
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\HomeController;
@@ -28,6 +29,10 @@ $router->group(['middleware' => ['auth']], function ($router) {
     $router->get('/api/dashboard/summary', [DashboardController::class, 'summary'], ['can:dashboard.view']);
     $router->get('/api/dashboard/activity', [DashboardController::class, 'activity'], ['can:dashboard.view']);
     $router->get('/api/sync', [SyncController::class, 'check']);
+
+    // Audit log
+    $router->get('/audit', [AuditController::class, 'index'], ['can:audit.view']);
+    $router->get('/api/audit/list', [AuditController::class, 'list'], ['can:audit.view']);
 
     // Cetak
     $router->get('/print/rekap/{id:int}', [PrintController::class, 'rekap'], ['can:savings.view']);
