@@ -108,6 +108,10 @@ Login dapat memakai username **atau** email (tidak peka huruf besar/kecil).
 - Desktop: sidebar; < 1024 px: topbar `Logo … ☰` dengan sidebar *off-canvas* yang menutup setelah memilih menu. Form 1 kolom di ponsel, modal maksimal selebar layar dan dapat di-scroll, judul memakai `clamp()`.
 - **Tidak ada overflow horizontal halaman.** Audit otomatis: `tools/responsive-audit.js` (tempel di konsol browser yang sudah login) membandingkan `scrollWidth` dengan lebar tampilan untuk 11 lebar (360–1920 px) dan melaporkan elemen yang keluar bingkai: `await __auditPages(['/dashboard','/tabungan','/santri'])`.
 
+## Hosting tanpa SSH (mis. InfinityFree)
+
+`php tools/package-hosting.php` membuat folder `deploy/` (di-ignore Git): isi `htdocs/` siap diunggah lewat FTP, `hosting-schema.sql` (tanpa CREATE DATABASE), `hosting-admin.sql` (Super Admin awal dengan kata sandi sementara acak), dan `PANDUAN-HOSTING.md` (langkah demi langkah). Seed/akun demo tidak ikut; kredensial lokal tidak ikut — `app/config/database.php` berisi placeholder untuk diisi di komputer Anda sebelum unggah.
+
 ## Menjalankan di produksi (checklist)
 
 1. Instalasi baru: impor **`database/schema.sql` saja** (jangan `seed.sql`). Memperbarui database lama: `php tools/backup.php` lalu `php tools/migrate.php`. Salin `app/config/database.example.php` → `database.php`, isi kredensial MySQL khusus aplikasi (bukan `root`).
@@ -157,7 +161,7 @@ app/core/      Router, Request, Response, Session, Csrf, Database, View, Validat
 app/controllers  app/models  app/services  app/middleware  app/views  app/helpers  app/config
 routes/web.php daftar route
 database/      schema.sql, seed.sql, migrations/
-tools/         create-admin.php, backup.php, migrate.php (khusus CLI), responsive-audit.js (uji overflow)
+tools/         create-admin.php, backup.php, migrate.php, package-hosting.php (khusus CLI), responsive-audit.js (uji overflow)
 storage/       log & sesi (di luar web)
 ```
 
