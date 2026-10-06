@@ -21,4 +21,15 @@ final class Setting
         $value = self::$all[$key] ?? null;
         return ($value === null || $value === '') ? $default : $value;
     }
+
+    /** Simpan (upsert) dan segarkan cache request ini. */
+    public static function set(string $key, ?string $value): void
+    {
+        Database::execute(
+            'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
+             ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)',
+            [$key, $value]
+        );
+        self::$all = null;
+    }
 }

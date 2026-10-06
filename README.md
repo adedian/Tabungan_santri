@@ -20,6 +20,7 @@ Sistem tabungan santri berbasis web — PHP Native (8.0+), MySQL/MariaDB, PDO, t
 | 13 | Sistem cetak (Rekap per Nama sesuai contoh Excel, cetak massal per kelas; cetak laporan = format sementara) | ✅ |
 | 14 | Audit log (halaman + filter: cari, modul, pengguna, tanggal, sort, paginasi) | ✅ |
 | 15 | Manajemen Pengguna (tambah/ubah, peran, aktif/nonaktif, atur ulang kata sandi; khusus Super Admin) | ✅ |
+| 16 | Pengaturan (nama lembaga + unggah logo; khusus Super Admin) | ✅ |
 
 ## Instalasi (XAMPP)
 
@@ -84,7 +85,7 @@ storage/       log & sesi (di luar web)
 - Ikon: `icon('nama')` dari `public/assets/icons/sprite.svg` (tambah `<symbol>` baru bila perlu).
 - JS (`App.*`): `api()` (CSRF otomatis, 401 → login), `toast()`, `confirm()`, `setLoading()`, `rupiah()`. Atribut: `data-money`, `data-bind-label`, `data-loading-text`, `data-confirm`.
 - Menu sidebar: `app/config/navigation.php` (`ready => true` saat halaman selesai). Matikan `app.show_planned_menu` di Phase 17.
-- Logo masih **placeholder** (`partials/brand.php`).
+- Logo: placeholder bawaan sampai Super Admin mengunggah logo di **Pengaturan** (`partials/brand.php`).
 
 ## Realtime (polling ringan)
 
@@ -128,6 +129,17 @@ storage/       log & sesi (di luar web)
 - Nama pengguna disimpan sebagai snapshot di tiap catatan, jadi tetap terbaca walau akun diubah/dihapus. Tanpa polling realtime: tombol **Muat ulang**.
 - Modul yang tercatat saat ini: `Auth`, `Tabungan`, `Santri`, `Laporan`, `Cetak`. Modul baru otomatis muncul di dropdown filter.
 - File: `app/models/AuditLog.php`, `app/services/AuditService.php`, `app/controllers/AuditController.php`, `app/views/audit/index.php`, `public/assets/js/audit.js`.
+
+## Pengaturan
+
+- Halaman `/pengaturan` (menu Sistem → Pengaturan); API `PUT /api/settings`. Izin `settings.manage`: **hanya Super Admin**.
+- **Nama lembaga** (wajib, maks. 100 karakter) tampil di sidebar dan halaman login. Disimpan di tabel `settings` (`school_name`).
+- **Logo**: pilih PNG/JPG/WEBP/SVG (maks. 5 MB). Browser menggambarnya ke canvas, memperkecil hingga **256 px**, lalu mengirim sebagai PNG (metadata hilang; SVG hanya dirasterisasi, tidak pernah disajikan sebagai SVG).
+  Server memvalidasi ulang: data URL `image/png`, tanda tangan PNG, 16–512 px, maks. 300 KB, dan berakhir tepat di penutup `IEND` (tanpa data tambahan).
+- Berkas disimpan di `storage/uploads/logo.png` (di luar web, folder di-ignore Git) dan disajikan lewat `GET /brand/logo?v=<versi>` (publik, karena dipakai halaman login) dengan `Content-Type: image/png` tetap, `nosniff`, dan CSP `sandbox`. Versi (`logo_version`) menjadi pembatal cache.
+- Berkas diganti **setelah** transaksi basis data berhasil; bila penyimpanan gagal, berkas sementara dibuang. Logo dapat dihapus (kembali ke placeholder).
+- Perubahan tercatat di Audit Log (modul `Pengaturan`). Folder `storage/uploads/` harus dapat ditulis oleh web server.
+- File: `app/services/SettingsService.php`, `app/controllers/SettingsController.php`, `app/views/settings/index.php`, `public/assets/js/settings.js`.
 
 ## Manajemen pengguna
 

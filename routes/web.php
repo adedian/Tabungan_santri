@@ -8,6 +8,7 @@ use App\Controllers\HomeController;
 use App\Controllers\PrintController;
 use App\Controllers\ReportController;
 use App\Controllers\SavingsController;
+use App\Controllers\SettingsController;
 use App\Controllers\StudentController;
 use App\Controllers\StyleguideController;
 use App\Controllers\SyncController;
@@ -18,6 +19,7 @@ use App\Controllers\UserController;
 
 $router->get('/', [HomeController::class, 'index']);
 $router->get('/health', [SystemController::class, 'health']);
+$router->get('/brand/logo', [SettingsController::class, 'logo']); // publik: dipakai halaman login
 
 // Tamu
 $router->get('/login', [AuthController::class, 'showLogin'], ['guest']);
@@ -34,6 +36,10 @@ $router->group(['middleware' => ['auth']], function ($router) {
     // Audit log
     $router->get('/audit', [AuditController::class, 'index'], ['can:audit.view']);
     $router->get('/api/audit/list', [AuditController::class, 'list'], ['can:audit.view']);
+
+    // Pengaturan (Super Admin)
+    $router->get('/pengaturan', [SettingsController::class, 'index'], ['can:settings.manage']);
+    $router->put('/api/settings', [SettingsController::class, 'update'], ['can:settings.manage']);
 
     // Pengguna (Super Admin)
     $router->get('/pengguna', [UserController::class, 'index'], ['can:users.manage']);

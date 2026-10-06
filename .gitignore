@@ -2,6 +2,7 @@
 /storage/logs/*
 /storage/sessions/*
 /storage/cache/*
+/storage/uploads/*
 !/storage/**/.gitkeep
 .DS_Store
 Thumbs.db

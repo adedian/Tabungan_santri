@@ -28,6 +28,8 @@
   border: 1px solid rgba(255, 255, 255, .22); border-radius: 10px; color: var(--gold-400);
 }
 .brand-mark svg { width: 26px; height: 26px; }
+.brand-mark--img { background: #fff; border-color: transparent; }
+.brand-mark--img img { width: 34px; height: 34px; object-fit: contain; display: block; }
 .brand-name {
   font-family: var(--font-display); font-weight: 600; font-size: 1rem;
   line-height: 1.15; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap;

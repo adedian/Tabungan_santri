@@ -448,3 +448,9 @@
 .swatch-meta b { display: block; font-size: var(--text-sm); }
 .demo-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
 .type-sample > * + * { margin-top: var(--space-3); }
+
+/* Pratinjau logo di Pengaturan: kotak gelap agar terlihat seperti di sidebar */
+.st-logo-preview { width: 56px; height: 56px; background: var(--green-900); }
+.st-logo-preview.has-img { background: #fff; border-color: var(--line); }
+.st-logo-preview svg { width: 34px; height: 34px; }
+.st-logo-preview img { width: 44px; height: 44px; }
