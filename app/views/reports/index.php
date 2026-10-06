@@ -18,9 +18,7 @@ $this->section('actions'); ?>
     <div class="dropdown-menu" data-dropdown-menu role="menu" hidden>
         <div class="dropdown-head"><b>Ekspor sesuai filter</b><span>Berkas mengikuti filter di halaman ini</span></div>
         <a class="dropdown-item" role="menuitem" data-export="transaksi:xlsx" href="#"><?= icon('file-chart') ?>Rincian transaksi — Excel (.xlsx)</a>
-        <a class="dropdown-item" role="menuitem" data-export="transaksi:csv" href="#"><?= icon('download') ?>Rincian transaksi — CSV</a>
         <a class="dropdown-item" role="menuitem" data-export="santri:xlsx" href="#"><?= icon('file-chart') ?>Rekap per santri — Excel (.xlsx)</a>
-        <a class="dropdown-item" role="menuitem" data-export="santri:csv" href="#"><?= icon('download') ?>Rekap per santri — CSV</a>
     </div>
 </div>
 <?php endif;

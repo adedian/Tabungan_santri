@@ -16,7 +16,7 @@ Sistem tabungan santri berbasis web — PHP Native (8.0+), MySQL/MariaDB, PDO, t
 | 8 | Form Tabungan (simpan transaksi masuk/keluar, aturan saldo, konfirmasi, panel "Baru dicatat") | ✅ |
 | 9–10 | Realtime + Riwayat Tabungan (cari, filter, sort, paginasi, saldo berjalan, ringkasan, ubah/hapus) | ✅ |
 | 11 | Detail Tabungan santri (profil mini, saldo, riwayat per santri, ubah/hapus, tautan dari nama) | ✅ |
-| 12 | Laporan Tabungan (ringkasan, rekap per kelas/santri, grafik periode, ekspor Excel/CSV) | ✅ |
+| 12 | Laporan Tabungan (ringkasan, rekap per kelas/santri, grafik periode, ekspor Excel) | ✅ |
 | 13 | Sistem cetak (Rekap per Nama sesuai contoh Excel, cetak massal per kelas; cetak laporan = format sementara) | ✅ |
 | 14 | Audit log (halaman + filter: cari, modul, pengguna, tanggal, sort, paginasi) | ✅ |
 | 15 | Manajemen Pengguna (tambah/ubah, peran, aktif/nonaktif, atur ulang kata sandi; khusus Super Admin) | ✅ |
@@ -243,9 +243,8 @@ storage/       log & sesi (di luar web)
 - **Saldo** pada ringkasan = masuk − keluar pada filter. Kolom **Saldo per tanggal** di rekap per santri = saldo ledger santri sampai tanggal "Sampai" (atau saat ini); tidak terpengaruh filter mutasi/bulan.
 - Rekap **per kelas** memakai kelas pada transaksi (snapshot); rekap **per santri** memakai kelas master.
 - Grafik otomatis: harian (≤ 62 hari), mingguan (≤ 30 minggu), selain itu bulanan.
-- **Ekspor** `GET /laporan/export?dataset=transaksi|santri&format=xlsx|csv` + filter (izin `reports.export`: Admin ke atas; operator hanya melihat). Maks. 50.000 baris (pesan meminta mempersempit filter). Setiap ekspor tercatat di audit log.
+- **Ekspor** `GET /laporan/export?dataset=transaksi|santri&format=xlsx` + filter (izin `reports.export`: Admin ke atas; operator hanya melihat). Maks. 50.000 baris (pesan meminta mempersempit filter). Setiap ekspor tercatat di audit log.
   - `.xlsx` ditulis tanpa pustaka (`app/services/export/XlsxWriter.php`): tanggal & uang berupa angka asli, baris total, filter otomatis, baris beku. Sudah diuji dibuka di Microsoft Excel.
-  - `.csv`: UTF-8 + BOM, pemisah koma. Teks yang diawali `= + - @` diberi apostrof di depan (cegah formula injection).
   - Menambah format baru (mis. PDF): buat penulis yang menerima `TableExport`, lalu daftarkan di `ReportController::export`.
 - Tombol **Cetak** ditambahkan di Phase 13 (format cetak laporan menunggu contoh dari pengguna).
 

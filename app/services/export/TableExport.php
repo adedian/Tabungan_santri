@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Services\Export;
 
 /**
- * Data tabel yang netral format. Penulis (CsvWriter, XlsxWriter, kelak PDF) cukup membaca objek ini.
+ * Data tabel yang netral format. Penulis (XlsxWriter, kelak PDF) cukup membaca objek ini.
  *
  * Tipe kolom: 'text' | 'int' | 'money' (rupiah, bilangan bulat) | 'date' (Y-m-d)
  */
