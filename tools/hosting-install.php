@@ -16,7 +16,8 @@ const MAX_FAILS = 8;
 $base = dirname(__DIR__);                   // folder yang berisi app/, storage/, public/
 $lock = $base . '/storage/installed.lock';
 $fails = $base . '/storage/install-fails.json';
-$schemaFile = $base . '/app/install/schema.sql';
+// Skema: paket hosting membawa app/install/schema.sql; bila seluruh proyek yang terunggah, pakai database/schema.sql (dibersihkan di bawah)
+$schemaFile = is_file($base . '/app/install/schema.sql') ? $base . '/app/install/schema.sql' : $base . '/database/schema.sql';
 
 header('X-Robots-Tag: noindex');
 header('Cache-Control: no-store');
@@ -45,7 +46,7 @@ if (SETUP_KEY_SHA256 === '__SETUP_KEY' . '_SHA256__') {
     page('Tidak valid', '<p class="lead">Berkas ini belum disiapkan oleh pembuat paket.</p>', 500);
 }
 if (!is_file($schemaFile)) {
-    page('Berkas kurang', '<div class="err">Berkas <code>app/install/schema.sql</code> tidak ditemukan. Pastikan seluruh isi paket (folder <code>app</code>) terunggah.</div>', 500);
+    page('Berkas kurang', '<div class="err">Skema database tidak ditemukan (<code>app/install/schema.sql</code> atau <code>database/schema.sql</code>). Pastikan berkas <code>install.php</code> berada di dalam folder <code>public</code> aplikasi dan folder aplikasi lainnya sudah terunggah.</div>', 500);
 }
 if (!extension_loaded('pdo_mysql')) {
     page('PHP', '<div class="err">Ekstensi PDO MySQL tidak aktif di hosting ini.</div>', 500);
@@ -102,6 +103,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $sql = (string) file_get_contents($schemaFile);
                 $sql = preg_replace('/^\s*--.*$/m', '', $sql) ?? $sql;
+                $sql = preg_replace('/^\s*CREATE DATABASE[^;]*;/mi', '', $sql) ?? $sql;   // database dibuat lewat panel hosting
+                $sql = preg_replace('/^\s*USE\s+`?[A-Za-z0-9_]+`?\s*;/mi', '', $sql) ?? $sql;
                 foreach (array_filter(array_map('trim', preg_split('/;\s*(?:\r?\n|$)/', $sql) ?: [])) as $i => $stmt) {
                     try {
                         $pdo->exec($stmt);

@@ -101,6 +101,11 @@ for ($i = 0; $i < 10; $i++) { $setupKey .= $alphabetKey[random_int(0, strlen($al
 copy($out . '/hosting-schema.sql', $web . '/app/install/schema.sql');
 file_put_contents($web . '/public/install.php', str_replace('__SETUP_KEY_SHA256__', hash('sha256', $setupKey), (string) file_get_contents(__DIR__ . '/hosting-install.php')));
 
+// Jalur SATU BERKAS: untuk kasus seluruh proyek sudah terunggah ke htdocs/<folder>/ — cukup unggah install.php ke folder public-nya
+@mkdir($out . '/satu-berkas', 0775, true);
+copy($web . '/public/install.php', $out . '/satu-berkas/install.php');
+file_put_contents($out . '/satu-berkas/ALIHKAN-AKAR.htaccess', "# OPSIONAL: simpan sebagai .htaccess di htdocs (di luar folder proyek) agar alamat utama menuju aplikasi.\n# Ganti Tabungan_santri bila nama folder proyek di hosting berbeda.\nRewriteEngine On\nRewriteCond %{REQUEST_URI} !^/Tabungan_santri/\nRewriteRule ^(.*)$ /Tabungan_santri/$1 [R=302,L]\n");
+
 // Super Admin awal dengan kata sandi sementara acak (jalur manual lewat phpMyAdmin; pemasang web tidak memakainya)
 $alphabet = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
 $pw = '';

@@ -43,3 +43,11 @@ Keamanan pemasang: wajib kode pemasangan; 8 kode salah mengunci (hapus `storage/
 
 ## Jalur manual (tanpa pemasang)
 Impor `hosting-schema.sql` lalu `hosting-admin.sql` lewat phpMyAdmin, ubah `app/config/database.php` (isi empat nilai `ISI_...`) sebelum diunggah, dan masuk dengan username `admin` + kata sandi sementara di `AKUN-AWAL.local.txt`. Hapus `public/install.php` karena tidak dipakai.
+
+## Jalur satu berkas (bila seluruh proyek sudah terunggah ke `htdocs/Tabungan_santri/`)
+Bila folder proyek terlanjur terunggah utuh dan aplikasinya sudah hidup di `https://DOMAIN/Tabungan_santri/`, tidak perlu memindahkan apa pun:
+1. Unggah **satu berkas** `satu-berkas/install.php` ke `htdocs/Tabungan_santri/public/`.
+2. Buka `https://DOMAIN/Tabungan_santri/install.php` dan isi formulir (kode pemasangan, data database, akun admin). Skema dibaca dari `database/schema.sql` di folder itu.
+3. Hapus `public/install.php` setelah berhasil.
+4. Opsional: simpan `satu-berkas/ALIHKAN-AKAR.htaccess` sebagai `.htaccess` di `htdocs/` agar alamat utama menuju aplikasi.
+Tanpa pembersihan, folder itu masih membawa berkas pengembang (`AKUN-DEMO.local.md`, `tools/`, `deploy/`, `database/seed.sql`); semuanya terkunci dari web, tetapi sebaiknya dihapus lewat FTP.
