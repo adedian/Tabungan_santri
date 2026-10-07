@@ -90,7 +90,7 @@ Login dapat memakai username **atau** email (tidak peka huruf besar/kecil).
 
 ## Tabungan alumni
 
-- Alumni = santri berstatus `alumni` (`graduated_at`, `graduation_year`, `graduation_academic_year`; jenjang & kelas terakhir tetap di baris santri). **Tidak ada tabel transaksi baru**: transaksi tetap di ledger yang sama dan saldo tetap dari `v_student_balances` → mustahil hitung ganda.
+- Alumni = santri berstatus `alumni` (`graduated_at`, `graduation_year`, `graduation_academic_year`; jenjang & kelas terakhir tetap di baris santri). **Tidak ada tabel transaksi baru**: transaksi tetap di ledger yang sama dan saldo tetap dari `Database::STUDENT_BALANCES` → mustahil hitung ganda.
 - Menu **Tabungan → Tabungan Alumni** (`/tabungan/alumni`) dan **Laporan → Rekap Alumni** (`/laporan/alumni`); izin `alumni.view` (semua peran). **Tarik Data**: *Detail* (tabel per alumni → halaman detail dengan seluruh riwayat transaksi + riwayat kelas) atau *Rekap* (ringkasan + tabel per tahun lulus, atau per kelas terakhir bila satu tahun dipilih). Filter: tahun lulus, tahun ajaran, cari.
 - Alumni **tidak muncul** di Data Santri, pilihan form tabungan, dan proses kenaikan; transaksi baru untuk alumni ditolak server. Alumni tidak dapat diubah/dinonaktifkan dari Data Santri.
 - Dashboard: "Total Saldo" hanya santri (bukan alumni); saldo alumni ditampilkan terpisah di kartu yang sama. Riwayat & Laporan tetap berbasis ledger (transaksi alumni sebelum lulus tetap ikut pada periodenya).
@@ -290,7 +290,7 @@ storage/       log & sesi (di luar web)
 
 ## Konvensi penting
 
-- **Saldo** selalu dihitung dari ledger (`SUM masuk − SUM keluar`), lihat view `v_student_balances`. Tidak ada kolom saldo.
+- **Saldo** selalu dihitung dari ledger (`SUM masuk − SUM keluar`), lihat `Database::STUDENT_BALANCES` (subkueri, bukan VIEW — hosting gratis menolak `CREATE VIEW`). Tidak ada kolom saldo.
 - **Soft delete**: semua query transaksi wajib memfilter `deleted_at IS NULL`; santri yang diarsipkan (`students.deleted_at`) tidak pernah ikut daftar/pilihan. Alumni hanya muncul lewat modul Alumni (`students.status = 'alumni'`).
 - **CSRF** otomatis untuk semua POST/PUT/PATCH/DELETE (field `_csrf` atau header `X-CSRF-Token`).
 - **CSP**: tidak ada `<script>` inline. Kirim data ke JS lewat atribut `data-*`.

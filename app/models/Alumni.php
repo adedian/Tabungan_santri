@@ -7,7 +7,7 @@ use App\Core\Database;
 
 /**
  * Alumni = santri berstatus 'alumni'. Tidak ada tabel transaksi terpisah: transaksi tetap di ledger yang sama
- * (savings_transactions), saldo dari v_student_balances — jadi tidak mungkin terjadi hitung ganda.
+ * (savings_transactions), saldo dari Database::STUDENT_BALANCES — jadi tidak mungkin terjadi hitung ganda.
  */
 final class Alumni
 {
@@ -20,7 +20,7 @@ final class Alumni
         'saldo'  => 'b.saldo {dir}',
     ];
 
-    private const FROM = "FROM students s JOIN v_student_balances b ON b.student_id = s.id";
+    private const FROM = "FROM students s JOIN " . Database::STUDENT_BALANCES . " b ON b.student_id = s.id";
 
     /** @return array{0:string,1:array} */
     private static function where(array $f): array

@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `students` (
 --   jenjang & kelas  : snapshot saat transaksi dibuat
 --   period_*         : periode tabungan (bisa berbeda dari bulan transaction_date)
 --   deleted_at       : soft delete. SEMUA query wajib memfilter deleted_at IS NULL
---                      (gunakan view v_student_balances / model untuk konsistensi)
+--                      (gunakan Database::STUDENT_BALANCES / model untuk konsistensi)
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `savings_transactions` (
   `id`               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -226,20 +226,7 @@ CREATE TABLE IF NOT EXISTS `schema_migrations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 INSERT IGNORE INTO `schema_migrations` (`version`) VALUES ('001_revisi1_kenaikan_alumni'), ('002_revisi2_indeks_dashboard');
 
--- ----------------------------------------------------------------------------
--- View: saldo per santri (satu tempat untuk aturan soft delete)
--- ----------------------------------------------------------------------------
-CREATE OR REPLACE VIEW `v_student_balances` AS
-SELECT
-  s.`id` AS `student_id`,
-  COALESCE(SUM(CASE WHEN t.`mutation_type` = 'masuk'  THEN t.`amount` END), 0) AS `total_masuk`,
-  COALESCE(SUM(CASE WHEN t.`mutation_type` = 'keluar' THEN t.`amount` END), 0) AS `total_keluar`,
-  COALESCE(SUM(CASE WHEN t.`mutation_type` = 'masuk' THEN t.`amount` ELSE -t.`amount` END), 0) AS `saldo`,
-  COUNT(t.`id`) AS `jumlah_transaksi`
-FROM `students` s
-LEFT JOIN `savings_transactions` t
-  ON t.`student_id` = s.`id` AND t.`deleted_at` IS NULL
-GROUP BY s.`id`;
+-- Saldo per santri: subkueri Database::STUDENT_BALANCES (bukan VIEW; hosting gratis menolak CREATE VIEW)
 
 -- ----------------------------------------------------------------------------
 -- Data awal sistem (bukan data dummy)

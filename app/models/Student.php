@@ -5,7 +5,7 @@ namespace App\Models;
 
 use App\Core\Database;
 
-/** Master santri. Saldo selalu dari view v_student_balances (ledger), tidak pernah disimpan di sini. */
+/** Master santri. Saldo selalu dari Database::STUDENT_BALANCES (ledger), tidak pernah disimpan di sini. */
 final class Student
 {
     /** Kunci sort dari klien => ekspresi ORDER BY (whitelist; bukan input langsung). */
@@ -73,7 +73,7 @@ final class Student
         $total = (int) Database::fetchValue("SELECT COUNT(*) FROM students s {$where}", $params);
         $rows  = Database::fetchAll(
             'SELECT ' . self::COLUMNS . "
-               FROM students s LEFT JOIN v_student_balances b ON b.student_id = s.id
+               FROM students s LEFT JOIN " . Database::STUDENT_BALANCES . " b ON b.student_id = s.id
                {$where}
               ORDER BY {$order}, s.id ASC
               LIMIT ? OFFSET ?",
@@ -88,7 +88,7 @@ final class Student
         [$where, $params] = self::where(['q' => $q, 'jenjang' => $jenjang, 'status' => $onlyActive ? 'aktif' : 'semua', 'with_alumni' => !$onlyActive]);
         $rows = Database::fetchAll(
             'SELECT ' . self::COLUMNS . "
-               FROM students s LEFT JOIN v_student_balances b ON b.student_id = s.id
+               FROM students s LEFT JOIN " . Database::STUDENT_BALANCES . " b ON b.student_id = s.id
                {$where}
               ORDER BY s.name ASC, s.id ASC LIMIT ?",
             array_merge($params, [$limit])
@@ -100,7 +100,7 @@ final class Student
     {
         $row = Database::fetchOne(
             'SELECT ' . self::COLUMNS . '
-               FROM students s LEFT JOIN v_student_balances b ON b.student_id = s.id
+               FROM students s LEFT JOIN ' . Database::STUDENT_BALANCES . ' b ON b.student_id = s.id
               WHERE s.id = ? AND s.deleted_at IS NULL LIMIT 1',
             [$id]
         );

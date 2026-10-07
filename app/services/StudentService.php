@@ -182,7 +182,7 @@ final class StudentService
             $in   = implode(',', array_fill(0, count($ids), '?'));
             $rows = Database::fetchAll(
                 "SELECT s.id, s.student_code, s.name, s.jenjang, s.kelas, s.status, COALESCE(b.saldo, 0) AS saldo
-                   FROM students s LEFT JOIN v_student_balances b ON b.student_id = s.id
+                   FROM students s LEFT JOIN " . Database::STUDENT_BALANCES . " b ON b.student_id = s.id
                   WHERE s.id IN ({$in}) AND s.deleted_at IS NULL ORDER BY s.id FOR UPDATE",
                 $ids
             );

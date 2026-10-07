@@ -41,7 +41,7 @@ final class Savings
         $out = ['TK' => ['jenjang' => 'TK', 'santri' => 0, 'saldo' => 0], 'SD' => ['jenjang' => 'SD', 'santri' => 0, 'saldo' => 0]];
         $rows = Database::fetchAll(
             "SELECT s.jenjang, SUM(s.status = 'aktif') AS santri, COALESCE(SUM(b.saldo), 0) AS saldo
-               FROM students s JOIN v_student_balances b ON b.student_id = s.id
+               FROM students s JOIN " . Database::STUDENT_BALANCES . " b ON b.student_id = s.id
               WHERE s.status <> 'alumni' AND s.deleted_at IS NULL
               GROUP BY s.jenjang"
         );
@@ -56,7 +56,7 @@ final class Savings
     {
         $r = Database::fetchOne(
             "SELECT COUNT(*) AS n, COALESCE(SUM(b.saldo), 0) AS saldo
-               FROM students s JOIN v_student_balances b ON b.student_id = s.id
+               FROM students s JOIN " . Database::STUDENT_BALANCES . " b ON b.student_id = s.id
               WHERE s.status = 'alumni' AND s.deleted_at IS NULL"
         ) ?? ['n' => 0, 'saldo' => 0];
         return ['alumni' => (int) $r['n'], 'saldo' => (int) $r['saldo']];
@@ -75,7 +75,7 @@ final class Savings
     /** Ringkasan satu santri (untuk panel saldo). */
     public static function studentSummary(int $studentId): array
     {
-        $r = Database::fetchOne('SELECT total_masuk, total_keluar, saldo, jumlah_transaksi FROM v_student_balances WHERE student_id = ?', [$studentId])
+        $r = Database::fetchOne('SELECT total_masuk, total_keluar, saldo, jumlah_transaksi FROM ' . Database::STUDENT_BALANCES . ' b WHERE b.student_id = ?', [$studentId])
             ?? ['total_masuk' => 0, 'total_keluar' => 0, 'saldo' => 0, 'jumlah_transaksi' => 0];
         return ['student_id' => $studentId, 'masuk' => (int) $r['total_masuk'], 'keluar' => (int) $r['total_keluar'],
                 'saldo' => (int) $r['saldo'], 'transaksi' => (int) $r['jumlah_transaksi']];

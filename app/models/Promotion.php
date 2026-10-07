@@ -42,7 +42,7 @@ final class Promotion
     {
         return Database::fetchAll(
             "SELECT s.id, s.student_code, s.nis, s.no_urut, s.name, s.jenjang, s.kelas, COALESCE(b.saldo, 0) AS saldo
-               FROM students s LEFT JOIN v_student_balances b ON b.student_id = s.id
+               FROM students s LEFT JOIN " . Database::STUDENT_BALANCES . " b ON b.student_id = s.id
               WHERE s.status = 'aktif' AND s.deleted_at IS NULL AND s.jenjang = ? AND s.kelas = ?
                 AND NOT EXISTS (SELECT 1 FROM student_class_history h WHERE h.student_id = s.id AND h.from_year = ?)
               ORDER BY s.no_urut IS NULL, s.no_urut, s.name, s.id" . ($lock ? ' FOR UPDATE' : ''),

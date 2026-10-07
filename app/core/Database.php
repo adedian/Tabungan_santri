@@ -10,6 +10,20 @@ use Throwable;
 /** Pembungkus PDO tipis. Semua query WAJIB lewat prepared statement. */
 final class Database
 {
+    /**
+     * Saldo per santri, dihitung dari ledger (aturan soft delete ada di sini saja).
+     * Subkueri, bukan VIEW: hosting gratis (mis. InfinityFree) menolak CREATE VIEW.
+     * Pakai sebagai tabel: "FROM students s LEFT JOIN " . Database::STUDENT_BALANCES . " b ON b.student_id = s.id"
+     */
+    public const STUDENT_BALANCES = "(SELECT s2.id AS student_id,
+        COALESCE(SUM(CASE WHEN t.mutation_type = 'masuk'  THEN t.amount END), 0) AS total_masuk,
+        COALESCE(SUM(CASE WHEN t.mutation_type = 'keluar' THEN t.amount END), 0) AS total_keluar,
+        COALESCE(SUM(CASE WHEN t.mutation_type = 'masuk' THEN t.amount ELSE -t.amount END), 0) AS saldo,
+        COUNT(t.id) AS jumlah_transaksi
+      FROM students s2
+      LEFT JOIN savings_transactions t ON t.student_id = s2.id AND t.deleted_at IS NULL
+      GROUP BY s2.id)";
+
     private static ?PDO $pdo = null;
 
     public static function pdo(): PDO

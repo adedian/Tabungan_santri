@@ -38,7 +38,7 @@ Keamanan pemasang: wajib kode pemasangan; 8 kode salah mengunci (hapus `storage/
 - **Cadangan manual**: tidak ada cron. Rutin ekspor database lewat phpMyAdmin → *Export* (format SQL) dan simpan di luar hosting.
 - Ada batas pemakaian harian (hits/CPU). Bila terlampaui, situs tertahan sementara.
 - Folder `storage/` dan `app/config/` harus dapat ditulis PHP. Bila pemasang meminta, atur izin folder (755/775) lewat FTP.
-- Memerlukan MariaDB 10.2+/MySQL 8 (fungsi window & view). Bila pemasang gagal pada langkah pembuatan tabel dengan pesan soal `ROW_NUMBER`/`VIEW`, versi MySQL hosting terlalu lama.
+- Memerlukan MariaDB 10.2+/MySQL 8 (fungsi window). Bila pemasang gagal pada langkah pembuatan tabel dengan pesan soal `ROW_NUMBER`, versi MySQL hosting terlalu lama. Skema tidak memakai VIEW (hosting gratis menolak `CREATE VIEW`).
 - Jangan pernah mengunggah `database/seed.sql` (akun demo) ke hosting.
 
 ## Jalur manual (tanpa pemasang)
