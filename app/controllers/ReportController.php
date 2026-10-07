@@ -63,7 +63,7 @@ final class ReportController extends Controller
         }
 
         $table = $res['table'];
-        $body  = $format === 'pdf' ? PdfWriter::render($table, (string) config('app.name', 'Tabungan Santri')) : XlsxWriter::render($table);
+        $body  = $format === 'pdf' ? PdfWriter::render($table, config('app.name', 'Tabungan Santri') . ' — dibuat oleh ' . config('app.author', '')) : XlsxWriter::render($table);
         $mime  = $format === 'pdf' ? PdfWriter::MIME : XlsxWriter::MIME;
         $name  = 'laporan-tabungan-' . ($dataset === 'santri' ? 'rekap-santri' : 'transaksi') . '-' . date('Ymd-His') . '.' . $format;
 

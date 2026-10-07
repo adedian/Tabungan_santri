@@ -7,6 +7,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
+    <meta name="author" content="<?= e(config('app.author')) ?>">
     <title><?= e($this->get('title', 'Cetak') . ' — ' . config('app.name')) ?></title>
     <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
     <meta name="base-url" content="<?= e(url('')) ?>">

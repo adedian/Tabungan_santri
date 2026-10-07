@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 return [
     'name'      => 'Tabungan Santri',
+    // Pembuat sistem: tampil di footer, halaman login, dan PDF laporan.
+    'author'    => 'Ade Dian Sukmana',
     // JANGAN true di production: menampilkan detail error ke pengguna.
     'debug'     => false,
     'timezone'  => 'Asia/Jakarta',

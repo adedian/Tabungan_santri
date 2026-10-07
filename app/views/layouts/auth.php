@@ -19,6 +19,7 @@
     </aside>
     <main class="auth-main" id="main">
         <div class="auth-card page"><?= $content ?></div>
+        <p class="auth-credit">Dibuat oleh <strong><?= e(config('app.author')) ?></strong></p>
     </main>
 </div>
 <div class="toast-region" id="toast-region" aria-live="polite"></div>

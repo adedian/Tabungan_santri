@@ -291,7 +291,7 @@ final class PdfWriter
         $objs[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
         $objs[4] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>';
         $info = 5 + 2 * $count;
-        $objs[5] = '<< /Title (' . $this->pdfString($title) . ') /Creator (Tabungan Santri) /Producer (Tabungan Santri) /CreationDate (D:' . date('YmdHis') . ') >>';
+        $objs[5] = '<< /Title (' . $this->pdfString($title) . ') /Author (Ade Dian Sukmana) /Creator (Tabungan Santri) /Producer (Tabungan Santri) /CreationDate (D:' . date('YmdHis') . ') >>';
 
         foreach ($this->pages as $i => $content) {
             $this->cur = '';

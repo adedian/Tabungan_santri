@@ -92,6 +92,7 @@ foreach (['success' => 'success', 'error' => 'error', 'warning' => 'warning', 'i
         <?php endif; ?>
         <?= $content ?>
     </main>
+    <footer class="app-credit">Sistem Tabungan Santri &middot; dibuat oleh <strong><?= e(config('app.author')) ?></strong></footer>
 </div>
 
 <div class="toast-region" id="toast-region" aria-live="polite"></div>

@@ -100,6 +100,8 @@
 
 /* ---------- Konten ---------- */
 .content { flex: 1; width: 100%; max-width: var(--content-max); margin-inline: auto; padding: var(--space-8) var(--space-8) var(--space-16); }
+.app-credit { padding: var(--space-4) var(--space-8); text-align: center; font-size: var(--text-sm); color: var(--muted); border-top: 1px solid var(--line); }
+.app-credit strong { color: var(--green-900); font-weight: 600; }
 .page { animation: page-in .24s var(--ease) both; }
 @keyframes page-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 
@@ -168,8 +170,10 @@
 .auth-sub { margin-top: var(--space-4); max-width: 26rem; color: var(--on-dark-muted); font-size: var(--text-md); }
 .auth-foot { font-size: var(--text-sm); color: var(--on-dark-muted); }
 
-.auth-main { display: grid; place-items: center; padding: var(--space-8) var(--space-6); }
+.auth-main { position: relative; display: grid; place-items: center; padding: var(--space-8) var(--space-6); }
 .auth-card { width: 100%; max-width: 25rem; }
+.auth-credit { position: absolute; left: 0; right: 0; bottom: var(--space-4); text-align: center; font-size: var(--text-sm); color: var(--muted); }
+.auth-credit strong { color: var(--green-900); font-weight: 600; }
 .auth-card h1 { margin-bottom: var(--space-2); }
 
 @media (max-width: 899px) {
