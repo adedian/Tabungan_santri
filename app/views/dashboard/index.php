@@ -45,6 +45,21 @@ $this->endSection(); ?>
     </div>
 </div>
 
+<?php if (can('students.view') && can('savings.view')): ?>
+<section class="card dash-search" aria-labelledby="ds-title">
+    <div class="dash-search-head">
+        <span class="dash-search-badge"><?= icon('search') ?></span>
+        <div>
+            <h2 id="ds-title">Cari Santri</h2>
+            <p class="muted">Ketik nama, ID, NIS, atau kelas — klik hasilnya untuk langsung membuka detail dan riwayat tabungan santri.</p>
+        </div>
+    </div>
+    <div class="input-icon dash-search-field">
+        <?= icon('search') ?>
+        <input class="input" type="search" id="ds-q" placeholder="Cari berdasarkan nama atau ID santri…" maxlength="100" aria-label="Cari santri">
+    </div>
+</section>
+<?php endif; ?>
 
 <section class="cls" id="cls-section" aria-labelledby="cls-title">
     <div class="cls-head">
@@ -145,8 +160,10 @@ $this->endSection(); ?>
 
 <script type="application/json" id="dash-data"><?= json_for_script($initial) ?></script>
 <?php $this->section('scripts'); ?>
+<script src="<?= e(asset('js/combobox.js')) ?>" defer></script>
 <script src="<?= e(asset('js/table.js')) ?>" defer></script>
 <script src="<?= e(asset('js/chart.js')) ?>" defer></script>
 <script src="<?= e(asset('js/dashboard-classes.js')) ?>" defer></script>
 <script src="<?= e(asset('js/dashboard.js')) ?>" defer></script>
+<script src="<?= e(asset('js/dashboard-search.js')) ?>" defer></script>
 <?php $this->endSection(); ?>

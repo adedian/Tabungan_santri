@@ -5,7 +5,7 @@
        fetch:   function (q, signal) -> Promise<item[]>,
        render:  function (item) -> {title, sub, right}      // teks polos (aman: textContent)
        display: function (item) -> string                    // teks di input setelah dipilih
-       onSelect(item), onClear(),
+       onSelect(item), onClear(), delay (ms debounce, default 220),
        emptyText: 'Tidak ada hasil', hint: 'Ketik untuk mencari…'
      });
      cb.value      -> item terpilih atau null
@@ -79,7 +79,7 @@
       o.fetch(q, ctrl.signal).then(function (res) { if (mine === seq) { paint(res); } })
         .catch(function (e) { if (e && e.name === 'AbortError') { return; } if (mine === seq) { items = []; list.textContent = ''; status.hidden = false; status.textContent = e && e.message ? e.message : 'Gagal memuat.'; } });
     }
-    var debounced = App.debounce(function () { search(input.value.trim()); }, 220);
+    var debounced = App.debounce(function () { search(input.value.trim()); }, o.delay || 220);
 
     function choose(it) {
       selected = it; input.value = o.display(it); clearBtn.hidden = false; wrap.classList.add('has-value');

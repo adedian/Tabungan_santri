@@ -127,6 +127,22 @@
   .dash-row { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 560px) { .dash-stats { grid-template-columns: minmax(0, 1fr); } }
+/* Dasbor — Cari Santri */
+.dash-search { margin-top: var(--space-4); padding: var(--space-5); border-left: 4px solid var(--gold-500, var(--green-700)); }
+.dash-search-head { display: flex; align-items: flex-start; gap: var(--space-3); margin-bottom: var(--space-4); }
+.dash-search-head h2 { font-family: var(--font-display); font-weight: 600; font-size: var(--text-xl); color: var(--green-900); }
+.dash-search-head p { margin-top: 2px; font-size: var(--text-sm); }
+.dash-search-badge { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius); background: var(--sage-100); color: var(--green-800, var(--green-900)); }
+.dash-search-field > .icon { z-index: 1; }
+.dash-search-field .input { min-height: 3rem; font-size: var(--text-lg); padding-left: 2.5rem; } /* input dibungkus .combo, jadi padding .input-icon tidak mengenainya */
+.dash-search .combo-option { min-height: 52px; }
+.dash-search .combo-pop { max-height: 22rem; }
+@media (max-width: 560px) {
+  .dash-search { padding: var(--space-4); }
+  .dash-search-head p { display: none; }
+  .dash-search-field .input { font-size: 1rem; }
+}
+
 .section-title { margin-bottom: var(--space-3); }
 
 /* ---------- Responsif: tablet & ponsel ---------- */
