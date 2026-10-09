@@ -1,7 +1,8 @@
 -- ============================================================================
 --  TABUNGAN SANTRI — DATA DUMMY UNTUK TESTING (jangan dipakai di production)
 --  Jalankan SETELAH schema.sql. Hanya untuk database kosong.
---  Akun demo: lihat README.md (kata sandi ada di AKUN-DEMO.local.md, lokal). JANGAN impor di server sungguhan.
+--  Akun demo dibuat TANPA kata sandi ('!BELUM-DIATUR' = tidak bisa login). Cara mengaktifkan: lihat README.md
+--  ("Akun demo"). JANGAN impor di server sungguhan.
 --  Santri 'Ahmad Fauzan' (SD 4A) sengaja tanpa transaksi untuk skenario uji README.
 -- ============================================================================
 
@@ -9,9 +10,9 @@ SET NAMES utf8mb4;
 USE `tabungan_santri`;
 
 INSERT INTO `users` (`id`,`name`,`username`,`email`,`password`,`role`,`status`) VALUES
-  (1,'Super Administrator','superadmin','superadmin@tabungan.test','$2y$10$q3XflzQ1l80BBnSYcWp6aerXEmAbDJEqp3evmr5wy23WSR/PAatfi','super_admin','aktif'),
-  (2,'Administrator','admin','admin@tabungan.test','$2y$10$1bPPMdgtoxSoPvK.IyMgmuGItPmrLVwkA7akZvHCUCbIqzKEBRdH2','admin','aktif'),
-  (3,'Operator Tabungan','operator','operator@tabungan.test','$2y$10$5HBJh9/EBJH799iZ/nOT3OLJjvKo.NdmQV2f/7fY7YurmzXkffNh6','operator','aktif');
+  (1,'Super Administrator','superadmin','superadmin@tabungan.test','!BELUM-DIATUR','super_admin','aktif'),
+  (2,'Administrator','admin','admin@tabungan.test','!BELUM-DIATUR','admin','aktif'),
+  (3,'Operator Tabungan','operator','operator@tabungan.test','!BELUM-DIATUR','operator','aktif');
 
 INSERT INTO `students` (`id`,`student_code`,`no_urut`,`name`,`jenjang`,`kelas`,`dawis_blok`,`status`) VALUES
   (1,'001',1,'Aisyah Zahra','TK','TK A','Blok A','aktif'),

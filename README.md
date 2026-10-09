@@ -58,10 +58,17 @@ Aplikasi juga dapat dibuka lewat `/Tabungan_santri/public/` atau virtual host ya
 | `admin` | Admin |
 | `operator` | Operator |
 
-Ketiganya memakai satu kata sandi demo yang **sengaja tidak ditulis di repo publik**. Di komputer pengembang kata sandi itu ada di
-`AKUN-DEMO.local.md` (berkas lokal, di-ignore Git). Bila berkas itu tidak ada, buat akun/kata sandi sendiri (lihat catatan di bawah).
+`seed.sql` **tidak menyertakan kata sandi** (kolom diisi `!BELUM-DIATUR`, sehingga ketiga akun belum bisa dipakai login). Untuk mengaktifkannya:
 
-> ⚠️ **Jangan impor `database/seed.sql` ke server sungguhan.** Berkas itu hanya untuk pengujian dan memuat akun demo dengan kata sandi bawaan.
+1. Buat satu Super Admin dengan kata sandi pilihan Anda (username harus berbeda dari akun demo):
+   ```bash
+   php tools/create-admin.php pengembang "Nama Anda"
+   ```
+2. Masuk dengan akun itu, buka **Sistem → Pengguna**, lalu atur kata sandi `superadmin`, `admin`, dan `operator` (ikon gembok) bila ingin dipakai.
+
+Kata sandi lokal Anda boleh dicatat di `AKUN-DEMO.local.md` (berkas lokal, di-ignore Git).
+
+> ⚠️ **Jangan impor `database/seed.sql` ke server sungguhan.** Berkas itu hanya untuk pengujian dan memuat data dummy beserta tiga akun demo.
 > Di production: impor `schema.sql` saja, lalu buat akun Super Admin pertama dengan `password_hash()` (satu `INSERT` ke tabel `users`); pengguna lain dibuat lewat halaman **Pengguna**.
 
 Login dapat memakai username **atau** email (tidak peka huruf besar/kecil).
