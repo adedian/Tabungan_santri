@@ -1,7 +1,7 @@
 <?php
 /**
  * Rekap Tabungan per Nama — mengikuti contoh Excel pengguna:
- *   judul tebal bergaris bawah (TK → "TK / KB"), blok NO. URUT / NAMA / DAWIS-BLOK,
+ *   judul tebal bergaris bawah (TK → "TK / KB"), blok NO. URUT / NAMA / KELAS,
  *   tabel NO | TGL | KETERANGAN | MASUK | KELUAR | TOTAL TABUNGAN (header peach), baris "Total Tabungan".
  *
  * @var array  $docs   hasil PrintService::rekap() per santri
@@ -41,7 +41,7 @@ $stamp = tanggal_id(date('Y-m-d')) . ' ' . date('H:i') . ' • ' . (string) (aut
             <dl class="rekap-ident">
                 <div><dt>NO. URUT</dt><dd>:</dd><dd class="v"><?= e($s['no_urut'] ?? '') ?></dd></div>
                 <div><dt>NAMA</dt><dd>:</dd><dd class="v"><?= e($s['name']) ?></dd></div>
-                <div><dt>DAWIS / BLOK</dt><dd>:</dd><dd class="v"><?= e($s['dawis_blok'] ?? '') ?></dd></div>
+                <div><dt>KELAS</dt><dd>:</dd><dd class="v"><?= e($s['kelas'] ?? '') ?></dd></div>
             </dl>
             <table class="rekap-table">
                 <colgroup><col class="c-no"><col class="c-tgl"><col class="c-ket"><col class="c-masuk"><col class="c-keluar"><col class="c-total"></colgroup>
