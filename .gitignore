@@ -1,4 +1,32 @@
+# Konfigurasi & kredensial
 /app/config/database.php
+.env
+.env.*
+!.env.example
+*.local.md
+*.local.txt
+*.local.php
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+id_rsa*
+.htpasswd
+
+# Cadangan / dump database (kecuali skema & seed di /database)
+*.sql.gz
+*.sql.zip
+*.dump
+*.bak
+*.sqlite
+*.sqlite3
+/storage/**/*.sql
+
+# Log & berkas sementara
+*.log
+*.tmp
+*.swp
 /storage/logs/*
 /storage/sessions/*
 /storage/cache/*
